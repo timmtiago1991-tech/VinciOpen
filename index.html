@@ -264,6 +264,11 @@ input,select{font-family:inherit}
 .tiechip:hover{border-color:var(--blue)}
 .tiechip.set{border-color:var(--gold); background:var(--gold-soft)}
 .tiechip .tiepos{font-weight:800; color:var(--gold); font-size:12px}
+.tiebox.done{border-color:var(--green); background:linear-gradient(120deg,rgba(109,190,69,.12),transparent)}
+.tiebox.done .tiechip.set{border-color:var(--green); background:rgba(109,190,69,.12)}
+.tiebox.done .tiechip .tiepos{color:var(--green)}
+.tiedone{font-size:11px; font-weight:800; color:var(--green)}
+.lockchip{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:800; color:var(--green); background:rgba(109,190,69,.12); border:1px solid var(--green); border-radius:999px; padding:8px 14px}
 .empty{padding:26px; text-align:center; color:var(--ink-3); font-size:13.5px; background:var(--panel); border:1px dashed var(--line); border-radius:12px}
 .foot{max-width:1200px; margin:0 auto; padding:8px 24px 40px; font-size:11px; color:var(--ink-3)}
 
@@ -309,6 +314,7 @@ input,select{font-family:inherit}
 <div id="menu" style="display:none; position:fixed; top:60px; right:16px; z-index:60; background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:6px; min-width:190px">
   <button class="btn ghost" style="width:100%; text-align:left; border:0; margin-bottom:2px" onclick="doExport()">⬇ Exportar (JSON)</button>
   <button class="btn ghost" style="width:100%; text-align:left; border:0; margin-bottom:2px" onclick="document.getElementById('importfile').click()">⬆ Importar (JSON)</button>
+  <button class="btn ghost" style="width:100%; text-align:left; border:0; margin-bottom:2px" onclick="resetScores()">🧹 Zerar apenas placares</button>
   <button class="btn ghost" style="width:100%; text-align:left; border:0; color:var(--wine)" onclick="doReset()">↺ Zerar tudo</button>
   <input type="file" id="importfile" accept="application/json" style="display:none" onchange="doImport(event)">
 </div>
@@ -399,7 +405,7 @@ const ROSTER = {
 function defaultState(){
   const potes=JSON.parse(JSON.stringify(ROSTER));
   const groups={}; GROUPS.forEach(g=> groups[g]=[null,null,null,null]);
-  return { potes, groups, drawDone:false, results:{}, finals:{}, nadal:{a:"",b:"",ra:null,rb:null}, tiebreaks:{} };
+  return { potes, groups, drawDone:false, groupsLocked:false, results:{}, finals:{}, nadal:{a:"",b:"",ra:null,rb:null}, tiebreaks:{} };
 }
 let S = defaultState();
 let VIEW = "classificacao";
@@ -412,7 +418,7 @@ function persistLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify(S)); }ca
 function allGroupIds(){ const ids=[]; GROUPS.forEach(g=> groupPairs().forEach(([i,j])=> ids.push(mid(g,i,j)))); return ids; }
 function saveResult(id){ persistLocal(); if(LIVE&&DBH){ DBH.collection("resultados").doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}); } }
 function saveFinal(slot){ persistLocal(); if(LIVE&&DBH){ DBH.collection("finais").doc(slot).set(S.finals[slot]||{a:null,b:null}).catch(()=>{}); } }
-function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection("config").doc("torneio").set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, nadal:S.nadal, tiebreaks:S.tiebreaks}).catch(()=>{}); } }
+function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection("config").doc("torneio").set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, groupsLocked:S.groupsLocked, nadal:S.nadal, tiebreaks:S.tiebreaks}).catch(()=>{}); } }
 function saveEverything(){
   persistLocal();
   if(LIVE&&DBH){
@@ -428,7 +434,7 @@ function initData(){
       firebase.initializeApp(firebaseConfig);
       DBH=firebase.firestore(); LIVE=true;
       DBH.collection("config").doc("torneio").onSnapshot(d=>{
-        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; if(c.nadal)S.nadal=c.nadal; S.tiebreaks=c.tiebreaks||{}; }
+        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; S.groupsLocked=!!c.groupsLocked; if(c.nadal)S.nadal=c.nadal; S.tiebreaks=c.tiebreaks||{}; }
         render();
       }, ()=>{});
       DBH.collection("resultados").onSnapshot(s=>{ s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, ()=>{});
@@ -501,7 +507,7 @@ function computeGroup(g){
       const seg=positions.slice().sort((x,y)=>{ const ix=order.indexOf(String(x)), iy=order.indexOf(String(y)); return (ix<0?99:ix)-(iy<0?99:iy); });
       for(let z=0;z<seg.length;z++) out[a+z]=seg[z];
       const resolved=positions.every(p=> order.includes(String(p)));
-      if(!resolved) positions.forEach(p=> tieTag[p]={key, members:positions.slice()});
+      positions.forEach(p=> tieTag[p]={key, members:positions.slice(), resolved});
     }
     a=b+1;
   }
@@ -523,7 +529,7 @@ function rankRunners(){
       const order=(S.tiebreaks&&S.tiebreaks[key])||[];
       const seg=runners.slice(a,b+1).sort((x,y)=>{ const ix=order.indexOf(x.g), iy=order.indexOf(y.g); return (ix<0?99:ix)-(iy<0?99:iy); });
       const resolved=grps.every(gg=> order.includes(gg));
-      for(let z=0;z<seg.length;z++){ seg[z]._tie = resolved?null:{key, members:grps.slice()}; runners[a+z]=seg[z]; }
+      for(let z=0;z<seg.length;z++){ seg[z]._tie = {key, members:grps.slice(), resolved}; runners[a+z]=seg[z]; }
     }
     a=b+1;
   }
@@ -631,7 +637,7 @@ function renderClassificacao(){
   const secs=GROUPS.map(g=>{
     const st=computeGroup(g), any=st.some(x=>x.played>0);
     const rows=st.map(r=>`<tr class="${r.rank===1?'q1':r.rank===2?'q2':''}">
-      <td class="pos">${r.rank}${r.tie?' <span class="tiemark" title="empate a definir">=</span>':''}</td>
+      <td class="pos">${r.rank}${r.tie&&!r.tie.resolved?' <span class="tiemark" title="empate a definir">=</span>':''}</td>
       <td class="l name">${isNamed(g,r.pos)?r.name:(g+r.pos)}${r.rank<=2?qtag(g,r.rank):''}</td>
       <td class="pp num">${r.w}</td><td class="num">${r.played}</td>
       <td class="num">${r.gw}</td><td class="num">${r.gl}</td>
@@ -658,7 +664,7 @@ function renderClassificacao(){
     const named = isNamed(r.g, r.pos);
     const cut = idx===2 ? ' style="border-top:2px dashed var(--gold)"' : '';
     return `<tr class="${idx<2?'q1':'q2'}">
-      <td class="pos"${cut}>${idx+1}${r._tie?' <span class="tiemark" title="empate a definir">=</span>':''}</td>
+      <td class="pos"${cut}>${idx+1}${r._tie&&!r._tie.resolved?' <span class="tiemark" title="empate a definir">=</span>':''}</td>
       <td class="l name"${cut}>${named?r.name:(r.g+r.pos)} <span class="pote-badge">Grupo ${r.g}</span></td>
       <td class="pp num"${cut}>${r.w}</td>
       <td class="num"${cut}>${r.saldo>0?'+':''}${r.saldo}</td>
@@ -883,9 +889,14 @@ function renderSorteio(){
   }).join("")+`</div>`;
 
   const bar = S.drawDone
-    ? `<div class="draft-bar"><button class="btn ghost" onclick="redoDraw()">↺ Refazer sorteio</button>
-        <button class="btn ghost" style="color:var(--wine)" onclick="resetSorteio()">🗑 Limpar tudo</button>
-        <span style="font-size:12.5px;color:var(--ink-3)">Os nomes já substituem A1–F4 em todo o torneio.</span></div>`
+    ? (S.groupsLocked
+        ? `<div class="draft-bar"><span class="lockchip">🔒 Grupos travados</span>
+            <button class="btn ghost" onclick="toggleLock()">🔓 Destravar</button>
+            <span style="font-size:12.5px;color:var(--ink-3)">Sorteio protegido — refazer, limpar e zerar tudo estão bloqueados.</span></div>`
+        : `<div class="draft-bar"><button class="btn primary" onclick="toggleLock()">🔒 Travar grupos</button>
+            <button class="btn ghost" onclick="redoDraw()">↺ Refazer sorteio</button>
+            <button class="btn ghost" style="color:var(--wine)" onclick="resetSorteio()">🗑 Limpar tudo</button>
+            <span style="font-size:12.5px;color:var(--ink-3)">Trave os grupos após o sorteio definitivo para não perdê-los.</span></div>`)
     : `<div class="draft-bar">
         <button class="btn primary" id="btnNext" ${ready?'':'disabled'} onclick="draftNext()">🎲 Sortear próximo</button>
         <button class="btn" id="btnAuto" ${ready?'':'disabled'} onclick="draftAll()">⏩ Sortear tudo</button>
@@ -900,7 +911,7 @@ function renderSorteio(){
     <div class="rsec-h">Grupos</div>${mini}
     ${ S.drawDone?'' : '<div class="rsec-h">Potes</div><div class="potes-grid">'+potesHtml+'</div>'}`;
 }
-function setPote(p,i,v){ S.potes[p][i]=v.trim(); saveConfig(); render(); }
+function setPote(p,i,v){ if(S.groupsLocked) return; S.potes[p][i]=v.trim(); saveConfig(); render(); }
 function loadRoster(){
   S.potes = JSON.parse(JSON.stringify(ROSTER));
   saveConfig(); render(); toast("Inscritos carregados nos potes.");
@@ -929,7 +940,7 @@ function commitReveal(item){
   if(slot){ slot.classList.add("just"); const pl=slot.querySelector(".pl"); pl.textContent=item.name; pl.classList.remove("tbd"); }
 }
 function draftNext(cb){
-  if(draftAnimating) return;
+  if(S.groupsLocked || draftAnimating) return;
   ensurePlan();
   if(draftIdx>=draftPlan.length){ finishDraw(); if(cb)cb(); return; }
   const item=draftPlan[draftIdx];
@@ -963,6 +974,7 @@ function draftNext(cb){
   }, 55);
 }
 function draftAll(){
+  if(S.groupsLocked) return;
   ensurePlan();
   while(draftIdx<draftPlan.length){ const it=draftPlan[draftIdx]; S.groups[it.group][it.pote-1]=it.name; draftIdx++; }
   finishDraw();
@@ -976,7 +988,22 @@ function finishDraw(){
   confetti();
   setTimeout(()=>{ toast("Sorteio concluído! Nomes aplicados em todo o torneio."); render(); }, 1200);
 }
+function toggleLock(){
+  if(S.groupsLocked){
+    if(!askCode()) return;
+    S.groupsLocked=false; saveConfig(); render(); toast("Grupos destravados.");
+  } else {
+    S.groupsLocked=true; saveConfig(); render(); toast("Grupos travados 🔒");
+  }
+}
+function resetScores(){
+  if(!askCode()) return;
+  if(!confirm("Zerar APENAS os placares (grupos, finais e Taça Nadal)? Os grupos sorteados, os potes e os nomes são mantidos.")) return;
+  S.results={}; S.finals={}; S.tiebreaks={}; S.nadal.ra=null; S.nadal.rb=null;
+  saveEverything(); render(); toast("Placares zerados. Grupos mantidos.");
+}
 function resetSorteio(){
+  if(S.groupsLocked){ toast("Grupos travados — destrave primeiro."); return; }
   if(!askCode()) return;
   if(!confirm("Limpar o sorteio? Apaga os nomes dos potes e a alocação dos grupos. (Os placares dos jogos são mantidos — para zerar tudo, use o menu ⋮ → Zerar tudo.)")) return;
   for(let p=1;p<=4;p++) S.potes[p]=["","","","","",""];
@@ -985,6 +1012,7 @@ function resetSorteio(){
   saveConfig(); render(); toast("Sorteio limpo.");
 }
 function redoDraw(){
+  if(S.groupsLocked){ toast("Grupos travados — destrave primeiro."); return; }
   if(!askCode()) return;
   if(!confirm("Refazer o sorteio? Isso limpa a alocação atual dos grupos (os nomes dos potes são mantidos).")) return;
   GROUPS.forEach(g=> S.groups[g]=[null,null,null,null]);
@@ -1015,13 +1043,16 @@ function setNadal(side,val){ S.nadal[side]=val.trim(); saveConfig(); }
 /* ============================================================ TIE-BREAK MANUAL (regra 5) */
 function tiePanel(title, key, members){
   const order=(S.tiebreaks&&S.tiebreaks[key])||[];
+  const resolved = members.length && members.every(m=> order.includes(m.id));
   const chips=members.map(m=>{
     const pos=order.indexOf(m.id);
     return `<button class="tiechip ${pos>=0?'set':''}" onclick="pickTie('${key}','${m.id}')">${pos>=0?`<span class="tiepos">${pos+1}º</span>`:''}${m.label}</button>`;
   }).join("");
-  return `<div class="tiebox">
-    <div class="tieh">⚖ Tie-break a definir — ${title}</div>
-    <div class="tiesub">Empate total nos critérios. Jogue o tie-break e clique nos atletas na <b>ordem do resultado</b> (1º clique = venceu).</div>
+  return `<div class="tiebox ${resolved?'done':''}">
+    <div class="tieh">⚖ Tie-break — ${title} ${resolved?'<span class="tiedone">✓ definido</span>':'<span style="color:var(--wine);font-weight:800">a definir</span>'}</div>
+    <div class="tiesub">${resolved
+      ? 'Ordem registrada. Para corrigir: clique num nome para desmarcá-lo e reordene, ou use <b>Limpar desempate</b>.'
+      : 'Empate total nos critérios. Jogue o tie-break e clique nos atletas na <b>ordem do resultado</b> (1º clique = venceu).'}</div>
     <div class="tiechips">${chips}</div>
     <button class="btn ghost" style="margin-top:9px;color:var(--wine);padding:6px 12px" onclick="clearTie('${key}')">Limpar desempate</button>
   </div>`;
@@ -1062,6 +1093,7 @@ function doImport(ev){
   r.readAsText(f); ev.target.value="";
 }
 function doReset(){
+  if(S.groupsLocked){ toast("Grupos travados — destrave para zerar tudo."); return; }
   if(!askCode()) return;
   if(!confirm("Zerar TUDO (potes, grupos e placares)? Não dá para desfazer.")) return;
   S=defaultState(); draftPlan=null; draftIdx=0; saveEverything(); render(); toast("Torneio zerado.");
