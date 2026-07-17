@@ -315,12 +315,13 @@ input,select{font-family:inherit}
      match /{document=**} { allow read, write: if true; }   // simples p/ evento interno
    ============================================================ */
 const firebaseConfig = {
-  apiKey:            "COLE_AQUI",
-  authDomain:        "SEU_PROJETO.firebaseapp.com",
-  projectId:         "SEU_PROJETO",
-  storageBucket:     "SEU_PROJETO.appspot.com",
-  messagingSenderId: "COLE_AQUI",
-  appId:             "COLE_AQUI"
+  apiKey:            "AIzaSyBjW5jkkDxNBLcdt20-vStSmiRChK5v7S8",
+  authDomain:        "vinci-open.firebaseapp.com",
+  projectId:         "vinci-open",
+  storageBucket:     "vinci-open.firebasestorage.app",
+  messagingSenderId: "178620701289",
+  appId:             "1:178620701289:web:2055c2ed4988961e6f20f8",
+  measurementId:     "G-GMB4H2ZX16"
 };
 const DEMO = String(firebaseConfig.apiKey).includes("COLE_AQUI");
 const LKEY = "tt_state_v1";
@@ -384,24 +385,37 @@ let S = defaultState();
 let VIEW = "grupos";
 let PHASE = "grupos"; // aba dentro de Jogos
 
-/* ============================================================ PERSISTÊNCIA (Firebase ou local) */
-let DBH = null;
-function persist(){
-  if(DEMO){ try{ localStorage.setItem(LKEY, JSON.stringify(S)); }catch(e){} }
-  else if(DBH){ DBH.collection("torneio").doc("estado").set(S, {merge:false}).catch(e=>toast("Erro ao salvar: "+e.message)); }
+/* ============================================================ PERSISTÊNCIA (Firebase por-documento, como o Broslão)
+   Coleções:  resultados/{matchId}  ·  finais/{slot}  ·  config/torneio  */
+let DBH = null, LIVE = false;
+function persistLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify(S)); }catch(e){} }
+function allGroupIds(){ const ids=[]; GROUPS.forEach(g=> groupPairs().forEach(([i,j])=> ids.push(mid(g,i,j)))); return ids; }
+function saveResult(id){ persistLocal(); if(LIVE&&DBH){ DBH.collection("resultados").doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}); } }
+function saveFinal(slot){ persistLocal(); if(LIVE&&DBH){ DBH.collection("finais").doc(slot).set(S.finals[slot]||{a:null,b:null}).catch(()=>{}); } }
+function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection("config").doc("torneio").set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, nadal:S.nadal}).catch(()=>{}); } }
+function saveEverything(){
+  persistLocal();
+  if(LIVE&&DBH){
+    saveConfig();
+    allGroupIds().forEach(id=> DBH.collection("resultados").doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}));
+    Object.keys(BRACKET).forEach(s=> DBH.collection("finais").doc(s).set(S.finals[s]||{a:null,b:null}).catch(()=>{}));
+  }
 }
 function initData(){
-  if(DEMO){
-    try{ const raw=localStorage.getItem(LKEY); if(raw) S=Object.assign(defaultState(), JSON.parse(raw)); }catch(e){}
-    render();
-  } else {
-    firebase.initializeApp(firebaseConfig);
-    DBH = firebase.firestore();
-    DBH.collection("torneio").doc("estado").onSnapshot(doc=>{
-      if(doc.exists){ S=Object.assign(defaultState(), doc.data()); }
-      render();
-    }, err=>{ toast("Firestore: "+err.message); render(); });
+  try{ const raw=localStorage.getItem(LKEY); if(raw) S=Object.assign(defaultState(), JSON.parse(raw)); }catch(e){}
+  if(!DEMO && typeof firebase!=="undefined" && firebase.initializeApp){
+    try{
+      firebase.initializeApp(firebaseConfig);
+      DBH=firebase.firestore(); LIVE=true;
+      DBH.collection("config").doc("torneio").onSnapshot(d=>{
+        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; if(c.nadal)S.nadal=c.nadal; }
+        render();
+      }, ()=>{});
+      DBH.collection("resultados").onSnapshot(s=>{ s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, ()=>{});
+      DBH.collection("finais").onSnapshot(s=>{ s.forEach(doc=> S.finals[doc.id]=doc.data()); render(); }, ()=>{});
+    }catch(e){ LIVE=false; }
   }
+  render();
 }
 
 /* ============================================================ HELPERS DE JOGO */
@@ -523,11 +537,14 @@ function render(){
   else if(VIEW==="chaves") app.innerHTML=renderChaves();
   else if(VIEW==="regras") app.innerHTML=renderRegras();
   const mc=$("#modechip");
-  mc.className="modechip"+(DEMO?" demo":"");
-  mc.querySelector(".lbl").textContent = DEMO? "modo demo" : "ao vivo";
-  $("#foot").innerHTML = (DEMO
-    ? "Modo demonstração — dados salvos só neste navegador. Cole seu <b>firebaseConfig</b> no topo do arquivo para ativar o placar ao vivo (Firestore), como no Broslão."
-    : "Placar ao vivo via Firebase/Firestore. ") + " · Formatação: RadarPE · Estrutura: BROS.lão · 24 jogadores · 6 grupos de 4.";
+  const online = LIVE && !DEMO;
+  mc.className="modechip"+(online?"":" demo");
+  mc.querySelector(".lbl").textContent = DEMO? "modo demo" : (LIVE? "ao vivo" : "offline");
+  $("#foot").innerHTML = (online
+    ? "Placar ao vivo via Firebase/Firestore (projeto vinci-open)."
+    : (DEMO? "Modo demonstração — dados só neste navegador."
+           : "Sem conexão com o Firebase agora — usando dados locais deste navegador."))
+    + " · Formatação: RadarPE · Estrutura: BROS.lão · 24 jogadores · 6 grupos de 4.";
 }
 
 /* ============================================================ GRUPOS */
@@ -791,11 +808,11 @@ function renderSorteio(){
     ${bar}${stage}${ S.drawDone?'' : '<div class="rsec-h">Potes</div>'+`<div class="potes-grid">${potesHtml}</div>`}
     <div class="rsec-h">Grupos</div>${mini}`;
 }
-function setPote(p,i,v){ S.potes[p][i]=v.trim(); persist(); render(); }
+function setPote(p,i,v){ S.potes[p][i]=v.trim(); saveConfig(); render(); }
 function fillSample(){
   const first=["Rafa","Nova","Bru","Duda","Léo","Tati","Gui","Mari","Théo","Ana","Caio","Bia","Igor","Lara","Vini","Nina","Zeca","Sofi","Pipo","Manu","Dado","Cleo","Rui","Tuca"];
   let k=0; for(let p=1;p<=4;p++) for(let i=0;i<6;i++) S.potes[p][i]=first[k++];
-  persist(); render(); toast("Nomes de exemplo preenchidos.");
+  saveConfig(); render(); toast("Nomes de exemplo preenchidos.");
 }
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function buildPlan(){
@@ -813,7 +830,7 @@ function commitReveal(item){
   S.groups[item.group][item.pote-1]=item.name;
   // marca slot recém-preenchido
   const stage=$("#stage"); if(stage) stage.classList.add("pop");
-  persist();
+  saveConfig();
   // atualização leve do mini-grid sem re-render total (mantém animação)
   const slot=document.querySelector(`.mini-g .slot[data-g="${item.group}"][data-pos="${item.pote}"]`);
   if(slot){ slot.classList.add("just"); const pl=slot.querySelector(".pl"); pl.textContent=item.name; pl.classList.remove("tbd"); }
@@ -859,7 +876,7 @@ function draftAll(){
 }
 function finishDraw(){
   if(S.drawDone) return;
-  S.drawDone=true; persist();
+  S.drawDone=true; saveConfig();
   const nameEl=$("#revealName"), destEl=$("#revealDest");
   if(nameEl) nameEl.textContent="🏆 Grupos definidos!";
   if(destEl){ destEl.innerHTML="Boa sorte a todos"; destEl.classList.add("show"); }
@@ -869,7 +886,7 @@ function finishDraw(){
 function redoDraw(){
   if(!confirm("Refazer o sorteio? Isso limpa a alocação atual dos grupos (os nomes dos potes são mantidos).")) return;
   GROUPS.forEach(g=> S.groups[g]=[null,null,null,null]);
-  S.drawDone=false; draftPlan=null; draftIdx=0; persist(); render();
+  S.drawDone=false; draftPlan=null; draftIdx=0; saveConfig(); render();
 }
 function confetti(){
   const c=$("#confetti"); c.innerHTML=""; c.classList.add("go");
@@ -886,12 +903,12 @@ function confetti(){
 /* ============================================================ SETTERS DE PLACAR */
 function setScore(kind,id,side,val){
   const v=val.trim()===""?null:Math.max(0,Math.min(20,parseInt(val,10)||0));
-  if(kind==="group"){ if(!S.results[id]) S.results[id]={a:null,b:null}; S.results[id][side]=v; }
-  else if(kind==="final"){ if(!S.finals[id]) S.finals[id]={a:null,b:null}; S.finals[id][side]=v; }
-  else if(kind==="nadal"){ S.nadal[side]=v; }
-  persist(); render();
+  if(kind==="group"){ if(!S.results[id]) S.results[id]={a:null,b:null}; S.results[id][side]=v; saveResult(id); }
+  else if(kind==="final"){ if(!S.finals[id]) S.finals[id]={a:null,b:null}; S.finals[id][side]=v; saveFinal(id); }
+  else if(kind==="nadal"){ S.nadal[side]=v; saveConfig(); }
+  render();
 }
-function setNadal(side,val){ S.nadal[side]=val.trim(); persist(); }
+function setNadal(side,val){ S.nadal[side]=val.trim(); saveConfig(); }
 
 /* ============================================================ MENU / EXPORT / TEMA */
 function toggleTheme(){
@@ -908,12 +925,12 @@ function doExport(){
 }
 function doImport(ev){
   const f=ev.target.files[0]; if(!f) return;
-  const r=new FileReader(); r.onload=()=>{ try{ S=Object.assign(defaultState(), JSON.parse(r.result)); persist(); render(); toast("Estado importado."); }catch(e){ toast("Arquivo inválido."); } };
+  const r=new FileReader(); r.onload=()=>{ try{ S=Object.assign(defaultState(), JSON.parse(r.result)); saveEverything(); render(); toast("Estado importado."); }catch(e){ toast("Arquivo inválido."); } };
   r.readAsText(f); ev.target.value="";
 }
 function doReset(){
   if(!confirm("Zerar TUDO (potes, grupos e placares)? Não dá para desfazer.")) return;
-  S=defaultState(); draftPlan=null; draftIdx=0; persist(); render(); toast("Torneio zerado.");
+  S=defaultState(); draftPlan=null; draftIdx=0; saveEverything(); render(); toast("Torneio zerado.");
 }
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2400); }
 
