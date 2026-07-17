@@ -252,6 +252,18 @@ input,select{font-family:inherit}
 .toast{position:fixed; bottom:88px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--bg);
   padding:11px 18px; border-radius:10px; font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:.25s; z-index:90}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.seedcols{display:grid; grid-template-columns:1.35fr 1fr; gap:14px; align-items:start}
+@media (max-width:760px){ .seedcols{grid-template-columns:1fr} }
+.m-row .pl.tbd, .brow .pl.tbd{font-size:12px}
+.tiemark{display:inline-block; color:var(--wine); font-weight:800; margin-left:2px}
+.tiebox{margin:10px 2px 0; padding:13px 15px; border:1px solid var(--gold); border-radius:11px; background:linear-gradient(120deg,var(--gold-soft),transparent)}
+.tieh{font-size:13px; font-weight:800; color:var(--ink); margin-bottom:3px}
+.tiesub{font-size:12px; color:var(--ink-2); margin-bottom:10px; line-height:1.45}
+.tiechips{display:flex; flex-wrap:wrap; gap:8px}
+.tiechip{display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:9px; padding:8px 13px; font-size:13.5px; font-weight:600}
+.tiechip:hover{border-color:var(--blue)}
+.tiechip.set{border-color:var(--gold); background:var(--gold-soft)}
+.tiechip .tiepos{font-weight:800; color:var(--gold); font-size:12px}
 .empty{padding:26px; text-align:center; color:var(--ink-3); font-size:13.5px; background:var(--panel); border:1px dashed var(--line); border-radius:12px}
 .foot{max-width:1200px; margin:0 auto; padding:8px 24px 40px; font-size:11px; color:var(--ink-3)}
 
@@ -325,6 +337,8 @@ const firebaseConfig = {
 };
 const DEMO = String(firebaseConfig.apiKey).includes("COLE_AQUI");
 const LKEY = "tt_state_v1";
+// Código do organizador — exigido para Zerar/Limpar/Refazer sorteio (evita apagões acidentais).
+const ADMIN_CODE = "vinci26";
 
 /* ============================================================ ESTRUTURA / DADOS FIXOS */
 const GROUPS = ["A","B","C","D","E","F"];
@@ -385,7 +399,7 @@ const ROSTER = {
 function defaultState(){
   const potes=JSON.parse(JSON.stringify(ROSTER));
   const groups={}; GROUPS.forEach(g=> groups[g]=[null,null,null,null]);
-  return { potes, groups, drawDone:false, results:{}, finals:{}, nadal:{a:"",b:"",ra:null,rb:null} };
+  return { potes, groups, drawDone:false, results:{}, finals:{}, nadal:{a:"",b:"",ra:null,rb:null}, tiebreaks:{} };
 }
 let S = defaultState();
 let VIEW = "classificacao";
@@ -398,7 +412,7 @@ function persistLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify(S)); }ca
 function allGroupIds(){ const ids=[]; GROUPS.forEach(g=> groupPairs().forEach(([i,j])=> ids.push(mid(g,i,j)))); return ids; }
 function saveResult(id){ persistLocal(); if(LIVE&&DBH){ DBH.collection("resultados").doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}); } }
 function saveFinal(slot){ persistLocal(); if(LIVE&&DBH){ DBH.collection("finais").doc(slot).set(S.finals[slot]||{a:null,b:null}).catch(()=>{}); } }
-function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection("config").doc("torneio").set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, nadal:S.nadal}).catch(()=>{}); } }
+function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection("config").doc("torneio").set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, nadal:S.nadal, tiebreaks:S.tiebreaks}).catch(()=>{}); } }
 function saveEverything(){
   persistLocal();
   if(LIVE&&DBH){
@@ -414,7 +428,7 @@ function initData(){
       firebase.initializeApp(firebaseConfig);
       DBH=firebase.firestore(); LIVE=true;
       DBH.collection("config").doc("torneio").onSnapshot(d=>{
-        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; if(c.nadal)S.nadal=c.nadal; }
+        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; if(c.nadal)S.nadal=c.nadal; S.tiebreaks=c.tiebreaks||{}; }
         render();
       }, ()=>{});
       DBH.collection("resultados").onSnapshot(s=>{ s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, ()=>{});
@@ -475,22 +489,51 @@ function computeGroup(g){
     }
     out.push(...cl); k=m+1;
   }
-  return out.map((pos,i)=> ({...st[pos], rank:i+1}));
+  // Regra 5 — tie-break manual: clusters de 3+ idênticos em vitórias/saldo/games perdidos
+  const tieTag={};
+  let a=0;
+  while(a<out.length){
+    let b=a; while(b+1<out.length && st[out[b+1]].w===st[out[a]].w && st[out[b+1]].saldo===st[out[a]].saldo && st[out[b+1]].gl===st[out[a]].gl) b++;
+    if(b-a>=2){
+      const positions=out.slice(a,b+1);
+      const key='g'+g+'|'+positions.slice().sort((x,y)=>x-y).join('');
+      const order=(S.tiebreaks&&S.tiebreaks[key])||[];
+      const seg=positions.slice().sort((x,y)=>{ const ix=order.indexOf(String(x)), iy=order.indexOf(String(y)); return (ix<0?99:ix)-(iy<0?99:iy); });
+      for(let z=0;z<seg.length;z++) out[a+z]=seg[z];
+      const resolved=positions.every(p=> order.includes(String(p)));
+      if(!resolved) positions.forEach(p=> tieTag[p]={key, members:positions.slice()});
+    }
+    a=b+1;
+  }
+  return out.map((pos,i)=> ({...st[pos], rank:i+1, tie: tieTag[pos]||null}));
 }
 function groupComplete(g){ return groupPairs().every(([i,j])=>{ const r=S.results[mid(g,i,j)]; return r&&r.a!=null&&r.b!=null&&r.a!==""&&r.b!==""; }); }
 function allGroupsComplete(){ return GROUPS.every(groupComplete); }
 
-let _seedCache=null, _seedKey=null;
-function seeding(){
-  const key=JSON.stringify(S.results);
-  if(_seedKey===key) return _seedCache;
-  _seedKey=key;
-  if(!allGroupsComplete()){ _seedCache=null; return null; }
-  const winners=[], runners=[];
-  GROUPS.forEach(g=>{ const r=computeGroup(g); winners.push({...r[0], g}); runners.push({...r[1], g}); });
-  const cmp=(x,y)=> y.w-x.w || y.saldo-x.saldo || x.gl-y.gl || x.g.localeCompare(y.g);
-  winners.sort(cmp);
-  const rs=[...runners].sort(cmp);
+// Ranking dos 2º colocados (entre grupos) com tie-break manual (regra 5)
+function rankRunners(){
+  const runners = GROUPS.map(g=>{ const r=computeGroup(g); return {...r[1], g}; });
+  runners.sort((x,y)=> y.w-x.w || y.saldo-x.saldo || x.gl-y.gl || x.g.localeCompare(y.g));
+  let a=0;
+  while(a<runners.length){
+    let b=a; while(b+1<runners.length && runners[b+1].w===runners[a].w && runners[b+1].saldo===runners[a].saldo && runners[b+1].gl===runners[a].gl) b++;
+    if(b-a>=1){ // 2+ empatados (não há confronto direto entre grupos)
+      const grps=runners.slice(a,b+1).map(r=>r.g);
+      const key='run|'+grps.slice().sort().join('');
+      const order=(S.tiebreaks&&S.tiebreaks[key])||[];
+      const seg=runners.slice(a,b+1).sort((x,y)=>{ const ix=order.indexOf(x.g), iy=order.indexOf(y.g); return (ix<0?99:ix)-(iy<0?99:iy); });
+      const resolved=grps.every(gg=> order.includes(gg));
+      for(let z=0;z<seg.length;z++){ seg[z]._tie = resolved?null:{key, members:grps.slice()}; runners[a+z]=seg[z]; }
+    }
+    a=b+1;
+  }
+  return runners;
+}
+// Monta a semeadura completa (sempre — usada também para a tabela provisória)
+function buildSeeding(){
+  const winners = GROUPS.map(g=>{ const r=computeGroup(g); return {...r[0], g}; });
+  winners.sort((x,y)=> y.w-x.w || y.saldo-x.saldo || x.gl-y.gl || x.g.localeCompare(y.g));
+  const rs = rankRunners();
   const best2=rs.slice(0,2), rest4=rs.slice(2);
   const gold=[null].concat(winners.slice(0,6)); // gold[1..6]
   gold[7]=best2[0]; gold[8]=best2[1];
@@ -499,7 +542,15 @@ function seeding(){
     const t=gold[7]; gold[7]=gold[8]; gold[8]=t;
   }
   const silver=[null].concat(rest4); // silver[1..4]
-  _seedCache={gold, silver}; return _seedCache;
+  return {gold, silver, winners};
+}
+let _seedCache=null, _seedKey=null;
+function seeding(){ // só resolve as chaves quando TODOS os grupos terminam
+  const key=JSON.stringify([S.results,S.tiebreaks]);
+  if(_seedKey===key) return _seedCache;
+  _seedKey=key;
+  _seedCache = allGroupsComplete()? buildSeeding() : null;
+  return _seedCache;
 }
 
 function resolveRef(ref){
@@ -525,6 +576,19 @@ function loserOf(slot){
   return (+r.a>+r.b)? p.b : p.a;
 }
 function pname(pl){ return pl? (pl.name || (pl.g+(pl.rank||""))) : null; }
+
+// Rótulos descritivos para vagas ainda não definidas (semeadura por mérito)
+const SEED_LABEL = {1:"Melhor líder de grupo",2:"2º melhor líder",3:"3º melhor líder",4:"4º melhor líder",5:"5º melhor líder",6:"6º melhor líder",7:"Melhor 2º colocado",8:"2º melhor 2º colocado"};
+const SIL_LABEL = {1:"3º melhor 2º col.",2:"4º melhor 2º col.",3:"5º melhor 2º col.",4:"6º melhor 2º col."};
+const SLOT_SHORT = {OQF1:"QF1",OQF2:"QF2",OQF3:"QF3",OQF4:"QF4",OSF1:"Semi 1",OSF2:"Semi 2",PSF1:"Semi 1",PSF2:"Semi 2"};
+function refLabel(ref){
+  if(!ref) return "a definir";
+  if(ref.seed!=null) return SEED_LABEL[ref.seed]||("Cabeça "+ref.seed);
+  if(ref.sil!=null) return SIL_LABEL[ref.sil]||("Prata "+ref.sil);
+  if(ref.win!=null) return "Vencedor "+(SLOT_SHORT[ref.win]||ref.win);
+  if(ref.lose!=null) return "Perdedor "+(SLOT_SHORT[ref.lose]||ref.lose);
+  return "a definir";
+}
 
 /* ============================================================ RENDER: NAV + ROTA */
 function renderNav(){
@@ -567,46 +631,90 @@ function renderClassificacao(){
   const secs=GROUPS.map(g=>{
     const st=computeGroup(g), any=st.some(x=>x.played>0);
     const rows=st.map(r=>`<tr class="${r.rank===1?'q1':r.rank===2?'q2':''}">
-      <td class="pos">${r.rank}</td>
+      <td class="pos">${r.rank}${r.tie?' <span class="tiemark" title="empate a definir">=</span>':''}</td>
       <td class="l name">${isNamed(g,r.pos)?r.name:(g+r.pos)}${r.rank<=2?qtag(g,r.rank):''}</td>
       <td class="pp num">${r.w}</td><td class="num">${r.played}</td>
       <td class="num">${r.gw}</td><td class="num">${r.gl}</td>
       <td class="num">${r.saldo>0?'+':''}${r.saldo}</td></tr>`).join("");
+    const seen={}; let panels="";
+    st.forEach(r=>{ if(r.tie && !seen[r.tie.key]){ seen[r.tie.key]=1;
+      const members=r.tie.members.map(pos=> ({id:String(pos), label:(isNamed(g,pos)?name(g,pos):(g+pos))}));
+      panels += tiePanel('Grupo '+g, r.tie.key, members);
+    }});
     return `<div class="groupsec">
       <div class="group-h"><span class="gtag">${g}</span><h3>Grupo ${g}</h3><span class="meta">${any?'parcial ao vivo':'sem resultados'}</span></div>
       <div class="card"><table class="gt">
         <thead><tr><th></th><th class="l">Atleta</th><th>V</th><th>J</th><th>GP</th><th>GC</th><th>Saldo</th></tr></thead>
-        <tbody>${rows}</tbody></table></div></div>`;
+        <tbody>${rows}</tbody></table></div>${panels}</div>`;
   }).join("");
   const status = allGroupsComplete()
     ? `<div class="banner"><span>✅ <b>Fase de grupos concluída.</b> Chaves Ouro e Prata montadas automaticamente na aba <b>Chaves</b>.</span></div>`
     : `<div class="banner"><span>Classificação atualiza ao vivo conforme os placares são inseridos na aba <b>Jogos</b>. Critérios de desempate na aba <b>Regras</b>.</span></div>`;
 
   // Classificação entre os 2º colocados — define as 2 últimas vagas da Ouro e a Prata
-  const runners = GROUPS.map(g=>{ const r=computeGroup(g); return {...r[1], g}; })
-    .sort((x,y)=> y.w-x.w || y.saldo-x.saldo || x.gl-y.gl || x.g.localeCompare(y.g));
+  const runners = rankRunners();
   const rrRows = runners.map((r,idx)=>{
     const dest = idx<2 ? 'ouro' : 'prata';
     const named = isNamed(r.g, r.pos);
     const cut = idx===2 ? ' style="border-top:2px dashed var(--gold)"' : '';
     return `<tr class="${idx<2?'q1':'q2'}">
-      <td class="pos"${cut}>${idx+1}</td>
+      <td class="pos"${cut}>${idx+1}${r._tie?' <span class="tiemark" title="empate a definir">=</span>':''}</td>
       <td class="l name"${cut}>${named?r.name:(r.g+r.pos)} <span class="pote-badge">Grupo ${r.g}</span></td>
       <td class="pp num"${cut}>${r.w}</td>
       <td class="num"${cut}>${r.saldo>0?'+':''}${r.saldo}</td>
       <td class="num"${cut}>${r.gl}</td>
       <td${cut}><span class="qbadge ${dest}">${dest==='ouro'?'QF Ouro':'SF Prata'}</span></td></tr>`;
   }).join("");
+  const seenR={}; let rPanels="";
+  runners.forEach(r=>{ if(r._tie && !seenR[r._tie.key]){ seenR[r._tie.key]=1;
+    const members=r._tie.members.map(gg=>{ const rr=runners.find(x=>x.g===gg); return {id:gg, label:(isNamed(gg,rr.pos)?name(gg,rr.pos):(gg+rr.pos))+' · Grupo '+gg}; });
+    rPanels += tiePanel('2º colocados', r._tie.key, members);
+  }});
   const runnersSection = `<div class="groupsec" style="margin-top:8px">
     <div class="group-h"><span class="gtag" style="background:linear-gradient(135deg,var(--gold),var(--gold-deep,#9c6a12))">2º</span>
       <h3>Classificação dos 2º colocados</h3><span class="meta">${allGroupsComplete()?'definida':'parcial'} · define Ouro × Prata</span></div>
     <div class="banner"><span>Os <b>2 melhores 2º</b> completam a <b>Chave Ouro</b> (vão às quartas); os <b>outros 4</b> vão para a <b>Chave Prata</b> (semifinais). Critério entre grupos: <b>vitórias → saldo de games → games perdidos</b>.${allGroupsComplete()?'':' Enquanto os grupos não terminam, esta ordem é <b>provisória</b>.'}</span></div>
     <div class="card"><table class="gt">
       <thead><tr><th></th><th class="l">2º colocado</th><th>V</th><th>Saldo</th><th>GC</th><th>Destino</th></tr></thead>
-      <tbody>${rrRows}</tbody></table></div></div>`;
+      <tbody>${rrRows}</tbody></table></div>${rPanels}</div>`;
+
+  // Semeadura das chaves (o que gera os confrontos)
+  const sdAll = buildSeeding();
+  const complete = allGroupsComplete();
+  const qfOf={1:'QF1',8:'QF1',4:'QF2',5:'QF2',3:'QF3',6:'QF3',2:'QF4',7:'QF4'};
+  const sfOf={1:'SF1',4:'SF1',2:'SF2',3:'SF2'};
+  const goldSeedRows=[1,2,3,4,5,6,7,8].map(s=>{
+    const pl=sdAll.gold[s];
+    return `<tr>
+      <td class="pos">${s}</td>
+      <td class="l name">${pl?pl.name:'—'}</td>
+      <td class="num">${pl?pl.g:'—'}</td>
+      <td style="text-align:left">${s<=6?'Líder de grupo':'2º colocado'}</td>
+      <td><span class="qbadge ouro">${qfOf[s]}</span></td></tr>`;
+  }).join("");
+  const silverSeedRows=[1,2,3,4].map(s=>{
+    const pl=sdAll.silver[s];
+    return `<tr>
+      <td class="pos">${s}</td>
+      <td class="l name">${pl?pl.name:'—'}</td>
+      <td class="num">${pl?pl.g:'—'}</td>
+      <td><span class="qbadge prata">${sfOf[s]}</span></td></tr>`;
+  }).join("");
+  const seedingSection = `<div class="groupsec" style="margin-top:8px">
+    <div class="group-h"><span class="gtag" style="background:linear-gradient(135deg,var(--navy),var(--blue))">⚑</span>
+      <h3>Semeadura das chaves</h3><span class="meta">${complete?'definida':'provisória'} · gera os confrontos</span></div>
+    <div class="banner"><span>Os 6 líderes são ordenados por <b>vitórias → saldo → games perdidos</b> (cabeças 1–6); os 2 melhores 2º entram como cabeças 7–8. Quartas da Ouro: <b>1×8, 4×5, 3×6, 2×7</b>.${complete?'':' Ordem <b>provisória</b> até todos os grupos terminarem.'}</span></div>
+    <div class="seedcols">
+      <div class="card"><div class="card-h"><h3>Chave Ouro · cabeças 1–8</h3></div>
+        <table class="gt"><thead><tr><th></th><th class="l">Atleta</th><th>Grupo</th><th style="text-align:left">Origem</th><th>QF</th></tr></thead>
+        <tbody>${goldSeedRows}</tbody></table></div>
+      <div class="card"><div class="card-h"><h3>Chave Prata · 1–4</h3></div>
+        <table class="gt"><thead><tr><th></th><th class="l">Atleta</th><th>Grupo</th><th>SF</th></tr></thead>
+        <tbody>${silverSeedRows}</tbody></table></div>
+    </div></div>`;
 
   return `<div class="page-head"><div><h1>Classificação</h1><p>Ordenação por vitórias, confronto direto (empate de 2), saldo de games e games perdidos. 1º + 2 melhores 2º → Ouro; demais 2º → Prata.</p></div>
-    <div class="stamp">GP = games pró · GC = games contra</div></div>${status}${secs}${runnersSection}`;
+    <div class="stamp">GP = games pró · GC = games contra</div></div>${status}${secs}${runnersSection}${seedingSection}`;
 }
 
 /* ============================================================ JOGOS / SCHEDULE */
@@ -644,9 +752,9 @@ function bracketMatchCardSchedule(slot, court){
   const na=pname(p.a), nb=pname(p.b);
   const a=r.a,bb=r.b, aw=(a!=null&&bb!=null&&a!==""&&bb!==""&&+a>+bb), bw=(a!=null&&bb!=null&&a!==""&&bb!==""&&+bb>+a);
   return `<div class="match"><div class="m-top"><span class="court">Quadra ${court}</span><span class="m-tier ${b.tier}">${b.tier==='ouro'?'Ouro':'Prata'}</span></div>
-    <div class="m-row ${aw?'win':''}"><span class="pl ${na?'':'tbd'}">${na||'a definir'}</span>${scoreInput('final',slot,'a',a)}</div>
+    <div class="m-row ${aw?'win':''}"><span class="pl ${na?'':'tbd'}">${na||refLabel(b.a)}</span>${scoreInput('final',slot,'a',a)}</div>
     <div class="m-vs">${b.label.toUpperCase()}</div>
-    <div class="m-row ${bw?'win':''}"><span class="pl ${nb?'':'tbd'}">${nb||'a definir'}</span>${scoreInput('final',slot,'b',bb)}</div></div>`;
+    <div class="m-row ${bw?'win':''}"><span class="pl ${nb?'':'tbd'}">${nb||refLabel(b.b)}</span>${scoreInput('final',slot,'b',bb)}</div></div>`;
 }
 function renderJogos(){
   const tabs=`<div class="phasetabs">
@@ -681,7 +789,7 @@ function brow(slot, side){
   const val = side==='a'? r.a : r.b;
   const other = side==='a'? r.b : r.a;
   const win = (val!=null&&other!=null&&val!==""&&other!==""&&+val>+other);
-  return `<div class="brow ${win?'win':''}"><span class="pl ${nm?'':'tbd'}">${nm||'a definir'}</span>
+  return `<div class="brow ${win?'win':''}"><span class="pl ${nm?'':'tbd'}">${nm||refLabel(side==='a'?b.a:b.b)}</span>
     <input class="sb num" inputmode="numeric" maxlength="2" value="${val==null?'':val}" onchange="setScore('final','${slot}','${side}',this.value)"></div>`;
 }
 function bmatch(slot){
@@ -730,7 +838,7 @@ function renderRegras(){
         <tr><td><b>2</b></td><td>Confronto direto (empate de 2)</td><td>Quem venceu o jogo entre os dois.</td></tr>
         <tr><td><b>3</b></td><td>Saldo de games</td><td>Games ganhos − games perdidos no grupo.</td></tr>
         <tr><td><b>4</b></td><td>Menor nº de games perdidos</td><td>Equivale a maior % de games ganhos.</td></tr>
-        <tr><td><b>5</b></td><td>Sorteio</td><td>Se restarem 2 empatados, reaplica-se o confronto direto antes do sorteio.</td></tr>
+        <tr><td><b>5</b></td><td>Tie-break (super tie-break na quadra)</td><td>Persistindo o empate, joga-se um tie-break decisivo. O organizador registra o vencedor no app (na Classificação) e a ordem é aplicada automaticamente.</td></tr>
       </tbody>
     </table>
 
@@ -869,6 +977,7 @@ function finishDraw(){
   setTimeout(()=>{ toast("Sorteio concluído! Nomes aplicados em todo o torneio."); render(); }, 1200);
 }
 function resetSorteio(){
+  if(!askCode()) return;
   if(!confirm("Limpar o sorteio? Apaga os nomes dos potes e a alocação dos grupos. (Os placares dos jogos são mantidos — para zerar tudo, use o menu ⋮ → Zerar tudo.)")) return;
   for(let p=1;p<=4;p++) S.potes[p]=["","","","","",""];
   GROUPS.forEach(g=> S.groups[g]=[null,null,null,null]);
@@ -876,6 +985,7 @@ function resetSorteio(){
   saveConfig(); render(); toast("Sorteio limpo.");
 }
 function redoDraw(){
+  if(!askCode()) return;
   if(!confirm("Refazer o sorteio? Isso limpa a alocação atual dos grupos (os nomes dos potes são mantidos).")) return;
   GROUPS.forEach(g=> S.groups[g]=[null,null,null,null]);
   S.drawDone=false; draftPlan=null; draftIdx=0; saveConfig(); render();
@@ -902,6 +1012,37 @@ function setScore(kind,id,side,val){
 }
 function setNadal(side,val){ S.nadal[side]=val.trim(); saveConfig(); }
 
+/* ============================================================ TIE-BREAK MANUAL (regra 5) */
+function tiePanel(title, key, members){
+  const order=(S.tiebreaks&&S.tiebreaks[key])||[];
+  const chips=members.map(m=>{
+    const pos=order.indexOf(m.id);
+    return `<button class="tiechip ${pos>=0?'set':''}" onclick="pickTie('${key}','${m.id}')">${pos>=0?`<span class="tiepos">${pos+1}º</span>`:''}${m.label}</button>`;
+  }).join("");
+  return `<div class="tiebox">
+    <div class="tieh">⚖ Tie-break a definir — ${title}</div>
+    <div class="tiesub">Empate total nos critérios. Jogue o tie-break e clique nos atletas na <b>ordem do resultado</b> (1º clique = venceu).</div>
+    <div class="tiechips">${chips}</div>
+    <button class="btn ghost" style="margin-top:9px;color:var(--wine);padding:6px 12px" onclick="clearTie('${key}')">Limpar desempate</button>
+  </div>`;
+}
+function pickTie(key,id){
+  const arr=(S.tiebreaks[key]||[]).slice();
+  const i=arr.indexOf(id);
+  if(i>=0) arr.splice(i,1); else arr.push(id);
+  if(arr.length) S.tiebreaks[key]=arr; else delete S.tiebreaks[key];
+  saveConfig(); render();
+}
+function clearTie(key){ delete S.tiebreaks[key]; saveConfig(); render(); }
+
+/* código do organizador para ações destrutivas */
+function askCode(){
+  const c=prompt("Código do organizador para confirmar:");
+  if(c===null) return false;
+  if(c.trim()!==ADMIN_CODE){ toast("Código incorreto."); return false; }
+  return true;
+}
+
 /* ============================================================ MENU / EXPORT / TEMA */
 function toggleTheme(){
   const el=document.documentElement, cur=el.dataset.theme;
@@ -921,6 +1062,7 @@ function doImport(ev){
   r.readAsText(f); ev.target.value="";
 }
 function doReset(){
+  if(!askCode()) return;
   if(!confirm("Zerar TUDO (potes, grupos e placares)? Não dá para desfazer.")) return;
   S=defaultState(); draftPlan=null; draftIdx=0; saveEverything(); render(); toast("Torneio zerado.");
 }
