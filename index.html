@@ -275,7 +275,7 @@ input,select{font-family:inherit}
 <!-- ============ HEADER ============ -->
 <header class="hdr">
   <div class="hdr__in">
-    <button class="brand" onclick="go('grupos')" aria-label="início">
+    <button class="brand" onclick="go('classificacao')" aria-label="início">
       <span class="logo-chip"><img src="logo.png" alt="Vinci Compass" onerror="this.closest('.logo-chip').classList.add('fallback')"></span>
       <span class="word">
         <span class="word__name">Vinci Compass <em>Open</em></span>
@@ -368,7 +368,6 @@ const BRACKET = {
 
 const NAV = [
   {id:"sorteio",   label:"Sorteio",       ico:'<path d="M4 4h6v6H4zM14 14h6v6h-6z"/><path d="M8 14h.01M6 16h.01M8 18h.01M16 6h.01M18 8h.01M16 8h.01"/>'},
-  {id:"grupos",    label:"Grupos",        ico:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'},
   {id:"classificacao", label:"Classificação", ico:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'},
   {id:"jogos",     label:"Jogos",         ico:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'},
   {id:"chaves",    label:"Chaves",        ico:'<path d="M6 3v6a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v6M6 21v-6"/>'},
@@ -376,13 +375,20 @@ const NAV = [
 ];
 
 /* ============================================================ ESTADO */
+// Inscritos oficiais por pote (1 = mais forte)
+const ROSTER = {
+  1:["Mateus Maia","Daniel Doine","Bruno Zaremba","Pedro Lopes","Matheus Canale","Andre Nogueira"],
+  2:["Marco Franklin","Rodrigo Rocha","Tiago Timm","Ilan Nigri","Leonardo Antunes","Felipe Moura"],
+  3:["Plinio Barbosa","Gustavo Xavier","Gabriel Felzen","Philip Medley","Carlos Eduardo Martins","Felipe Hallot"],
+  4:["Eike Rabello","Pedro Albuquerque","Gustavo Castro","Luis Guedes","VH Borges","Renan Pires"]
+};
 function defaultState(){
-  const potes={}; for(let p=1;p<=4;p++) potes[p]=["","","","","",""];
+  const potes=JSON.parse(JSON.stringify(ROSTER));
   const groups={}; GROUPS.forEach(g=> groups[g]=[null,null,null,null]);
   return { potes, groups, drawDone:false, results:{}, finals:{}, nadal:{a:"",b:"",ra:null,rb:null} };
 }
 let S = defaultState();
-let VIEW = "grupos";
+let VIEW = "classificacao";
 let PHASE = "grupos"; // aba dentro de Jogos
 
 /* ============================================================ PERSISTÊNCIA (Firebase por-documento, como o Broslão)
@@ -531,7 +537,6 @@ function render(){
   renderNav();
   const app=$("#app");
   if(VIEW==="sorteio") app.innerHTML=renderSorteio();
-  else if(VIEW==="grupos") app.innerHTML=renderGrupos();
   else if(VIEW==="classificacao") app.innerHTML=renderClassificacao();
   else if(VIEW==="jogos") app.innerHTML=renderJogos();
   else if(VIEW==="chaves") app.innerHTML=renderChaves();
@@ -545,30 +550,6 @@ function render(){
     : (DEMO? "Modo demonstração — dados só neste navegador."
            : "Sem conexão com o Firebase agora — usando dados locais deste navegador."))
     + " · Formatação: RadarPE · Estrutura: BROS.lão · 24 jogadores · 6 grupos de 4.";
-}
-
-/* ============================================================ GRUPOS */
-function renderGrupos(){
-  const secs=GROUPS.map(g=>{
-    const st=computeGroup(g);
-    const rows=[1,2,3,4].map(pos=>{
-      const named=isNamed(g,pos);
-      const s=st.find(x=>x.pos===pos);
-      const rec = s && s.played>0 ? `${s.w}V · ${s.saldo>=0?'+':''}${s.saldo} games` : "—";
-      return `<div class="r">
-        <span class="pote-badge">P${POTE_OF_POS[pos]}</span>
-        <span class="pl ${named?'':'tbd'}">${named?name(g,pos):('à definir · '+g+pos)}</span>
-        <span class="rec num">${rec}</span></div>`;
-    }).join("");
-    return `<div class="groupsec">
-      <div class="group-h"><span class="gtag">${g}</span><h3>Grupo ${g}</h3><span class="meta">round-robin · 3 jogos por atleta</span></div>
-      <div class="gcards"><div class="card"><div class="roster">${rows}</div></div></div>
-    </div>`;
-  }).join("");
-  return `<div class="page-head">
-      <div><h1>Grupos</h1><p>Seis grupos de quatro. As vagas A1–F4 são preenchidas pelo sorteio por potes. Cada atleta joga 3 partidas (set de 4 games).</p></div>
-      <div class="stamp">${S.drawDone?'Sorteio realizado':'Aguardando sorteio'}</div>
-    </div>${secs}`;
 }
 
 /* ============================================================ CLASSIFICAÇÃO */
@@ -795,31 +776,35 @@ function renderSorteio(){
 
   const bar = S.drawDone
     ? `<div class="draft-bar"><button class="btn ghost" onclick="redoDraw()">↺ Refazer sorteio</button>
+        <button class="btn ghost" style="color:var(--wine)" onclick="resetSorteio()">🗑 Limpar tudo</button>
         <span style="font-size:12.5px;color:var(--ink-3)">Os nomes já substituem A1–F4 em todo o torneio.</span></div>`
     : `<div class="draft-bar">
         <button class="btn primary" id="btnNext" ${ready?'':'disabled'} onclick="draftNext()">🎲 Sortear próximo</button>
         <button class="btn" id="btnAuto" ${ready?'':'disabled'} onclick="draftAll()">⏩ Sortear tudo</button>
-        <button class="btn ghost" onclick="fillSample()">Preencher exemplo</button>
+        <button class="btn ghost" onclick="loadRoster()">Carregar inscritos</button>
+        <button class="btn ghost" style="color:var(--wine)" onclick="resetSorteio()">🗑 Limpar nomes</button>
         ${ready?'':'<span style="font-size:12.5px;color:var(--ink-3)">Preencha 6 nomes em cada pote para liberar o sorteio.</span>'}
       </div>`;
 
-  return `<div class="page-head"><div><h1>Sorteio</h1><p>Divida os 24 atletas em 4 potes de 6 (por nível/força). O sorteio coloca <b>um atleta de cada pote em cada grupo</b> — e os nomes passam a valer em toda a tabela.</p></div>
+  return `<div class="page-head"><div><h1>Sorteio</h1><p>O sorteio começa pelos <b>cabeças de chave</b> (pote 1) na ordem dos grupos — A1, B1, C1… — depois pote 2 (A2, B2…), e assim por diante. Sorteia-se qual atleta do pote entra em cada vaga.</p></div>
     <div class="stamp">4 potes × 6 · 1 por pote por grupo</div></div>
-    ${bar}${stage}${ S.drawDone?'' : '<div class="rsec-h">Potes</div>'+`<div class="potes-grid">${potesHtml}</div>`}
-    <div class="rsec-h">Grupos</div>${mini}`;
+    ${bar}${stage}
+    <div class="rsec-h">Grupos</div>${mini}
+    ${ S.drawDone?'' : '<div class="rsec-h">Potes</div><div class="potes-grid">'+potesHtml+'</div>'}`;
 }
 function setPote(p,i,v){ S.potes[p][i]=v.trim(); saveConfig(); render(); }
-function fillSample(){
-  const first=["Rafa","Nova","Bru","Duda","Léo","Tati","Gui","Mari","Théo","Ana","Caio","Bia","Igor","Lara","Vini","Nina","Zeca","Sofi","Pipo","Manu","Dado","Cleo","Rui","Tuca"];
-  let k=0; for(let p=1;p<=4;p++) for(let i=0;i<6;i++) S.potes[p][i]=first[k++];
-  saveConfig(); render(); toast("Nomes de exemplo preenchidos.");
+function loadRoster(){
+  S.potes = JSON.parse(JSON.stringify(ROSTER));
+  saveConfig(); render(); toast("Inscritos carregados nos potes.");
 }
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function buildPlan(){
+  // Ordem: pote 1 (cabeças de chave) nos grupos A→F, depois pote 2 nos grupos A→F, etc.
+  // A ordem dos grupos é fixa; só QUAL atleta do pote entra é sorteado.
   const plan=[];
   for(let p=1;p<=4;p++){
-    const names=shuffle(S.potes[p].slice()), grps=shuffle(GROUPS.slice());
-    grps.forEach((g,idx)=> plan.push({pote:p, name:names[idx], group:g}));
+    const names=shuffle(S.potes[p].slice());
+    GROUPS.forEach((g,idx)=> plan.push({pote:p, name:names[idx], group:g}));
   }
   return plan;
 }
@@ -855,7 +840,7 @@ function draftNext(cb){
       clearInterval(spin);
       nameEl.classList.remove("cycling");
       nameEl.textContent=item.name;
-      destEl.innerHTML=`vai para o <b>Grupo</b> <span class="gtag2">${item.group}</span>`;
+      destEl.innerHTML=`<b>${item.pote===1?'Cabeça de chave':'Vaga '+item.pote}</b> · Grupo <span class="gtag2">${item.group}</span>`;
       destEl.classList.add("show");
       commitReveal(item);
       draftIdx++;
@@ -882,6 +867,13 @@ function finishDraw(){
   if(destEl){ destEl.innerHTML="Boa sorte a todos"; destEl.classList.add("show"); }
   confetti();
   setTimeout(()=>{ toast("Sorteio concluído! Nomes aplicados em todo o torneio."); render(); }, 1200);
+}
+function resetSorteio(){
+  if(!confirm("Limpar o sorteio? Apaga os nomes dos potes e a alocação dos grupos. (Os placares dos jogos são mantidos — para zerar tudo, use o menu ⋮ → Zerar tudo.)")) return;
+  for(let p=1;p<=4;p++) S.potes[p]=["","","","","",""];
+  GROUPS.forEach(g=> S.groups[g]=[null,null,null,null]);
+  S.drawDone=false; draftPlan=null; draftIdx=0;
+  saveConfig(); render(); toast("Sorteio limpo.");
 }
 function redoDraw(){
   if(!confirm("Refazer o sorteio? Isso limpa a alocação atual dos grupos (os nomes dos potes são mantidos).")) return;
