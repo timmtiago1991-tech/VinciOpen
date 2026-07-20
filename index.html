@@ -352,15 +352,15 @@ const POTE_OF_POS = {1:1,2:2,3:3,4:4}; // posição i no grupo vem do pote i
 
 // Fase de grupos (30 min, 10h–14h30) — com a Taça Nadal 11h–12h numa quadra
 const GROUP_SCHEDULE = [
-  {time:"10:00", courts:[{g:"B",i:2,j:4},{g:"A",i:1,j:3},{g:"C",i:3,j:4},{g:"E",i:1,j:4},null]},
-  {time:"10:30", courts:[{g:"D",i:3,j:4},{g:"A",i:2,j:4},{g:"F",i:1,j:3},{g:"F",i:2,j:4},null]},
-  {time:"11:00", courts:[{g:"E",i:2,j:4},{g:"C",i:1,j:4},{g:"B",i:3,j:4},{nadal:true},null]},
-  {time:"11:30", courts:[{g:"D",i:2,j:4},{g:"A",i:3,j:4},{g:"D",i:1,j:3},{nadalCont:true},null]},
-  {time:"12:00", courts:[{g:"C",i:1,j:3},{g:"E",i:2,j:3},{g:"B",i:1,j:2},{g:"F",i:1,j:2},{g:"C",i:2,j:4}]},
-  {time:"12:30", courts:[{g:"D",i:2,j:3},{g:"D",i:1,j:4},{g:"A",i:2,j:3},{g:"A",i:1,j:4},{g:"F",i:3,j:4}]},
-  {time:"13:00", courts:[{g:"E",i:1,j:2},{g:"B",i:2,j:3},{g:"E",i:3,j:4},{g:"C",i:1,j:2},{g:"B",i:1,j:4}]},
-  {time:"13:30", courts:[{g:"F",i:2,j:3},{g:"A",i:1,j:2},{g:"D",i:1,j:2},{g:"F",i:1,j:4},null]},
-  {time:"14:00", courts:[{g:"E",i:1,j:3},{g:"B",i:1,j:3},{g:"C",i:2,j:3},null,null]}
+  {time:"10:00", courts:[{g:"C",i:1,j:2},{g:"D",i:1,j:4},{g:"F",i:2,j:4},{g:"A",i:1,j:2},null]},
+  {time:"10:30", courts:[{g:"E",i:1,j:3},{g:"B",i:3,j:4},{g:"B",i:1,j:2},{g:"E",i:2,j:4},null]},
+  {time:"11:00", courts:[{g:"F",i:1,j:2},{g:"D",i:2,j:4},{g:"A",i:1,j:3},{nadal:true},null]},
+  {time:"11:30", courts:[{g:"C",i:2,j:4},{g:"B",i:1,j:3},{g:"C",i:1,j:3},{nadalCont:true},null]},
+  {time:"12:00", courts:[{g:"D",i:2,j:3},{g:"F",i:1,j:3},{g:"A",i:3,j:4},{nadalCont:true},{g:"B",i:2,j:4}]},
+  {time:"12:30", courts:[{g:"C",i:2,j:3},{g:"E",i:2,j:3},{g:"C",i:1,j:4},{nadalCont:true},{g:"E",i:1,j:4}]},
+  {time:"13:00", courts:[{g:"F",i:3,j:4},{g:"A",i:2,j:4},{g:"D",i:1,j:2},{g:"B",i:1,j:4},{g:"D",i:3,j:4}]},
+  {time:"13:30", courts:[{g:"B",i:2,j:3},{g:"E",i:3,j:4},{g:"E",i:1,j:2},{g:"C",i:3,j:4},null]},
+  {time:"14:00", courts:[{g:"F",i:1,j:4},{g:"F",i:2,j:3},{g:"A",i:2,j:3},{g:"D",i:1,j:3},{g:"A",i:1,j:4}]}
 ];
 
 // Finais (45 min, 15h–18h) após pausa 14h30–15h
@@ -399,7 +399,7 @@ const NAV = [
 const ROSTER = {
   1:["Mateus Maia","Daniel Doine","Bruno Zaremba","Pedro Lopes","Matheus Canale","Andre Nogueira"],
   2:["Marco Franklin","Rodrigo Rocha","Tiago Timm","Ilan Nigri","Leonardo Antunes","Felipe Moura"],
-  3:["Plinio Barbosa","Gustavo Xavier","Gabriel Felzen","Philip Medley","Kadu Martins","Felipe Hallot"],
+  3:["Plinio Barbosa","Gustavo Xavier","Gabriel Felzen","Philip Medley","Carlos Eduardo Martins","Felipe Hallot"],
   4:["Eike Rabello","Pedro Albuquerque","Gustavo Castro","Luis Guedes","VH Borges","Renan Pires"]
 };
 function defaultState(){
@@ -734,11 +734,11 @@ function groupMatchCard(entry, court){
   if(entry.nadalCont){
     return `<div class="match nadal"><div class="m-top"><span class="court">Quadra ${court}</span><span class="m-tier ouro">🎾 Especial</span></div>
       <div class="m-vs" style="margin-top:14px">🎾 TAÇA NADAL</div>
-      <div style="text-align:center;font-size:11.5px;color:var(--ink-3);font-weight:600;padding:6px 0 2px">jogo único de 1h · em andamento (11h–12h)</div></div>`;
+      <div style="text-align:center;font-size:11.5px;color:var(--ink-3);font-weight:600;padding:6px 0 2px">jogo único de 2h · em andamento (11h–13h)</div></div>`;
   }
   if(entry.nadal){
     const n=S.nadal;
-    return `<div class="match nadal"><div class="m-top"><span class="court">Quadra ${court}</span><span class="m-tier ouro">🎾 Especial · 1h (11h–12h)</span></div>
+    return `<div class="match nadal"><div class="m-top"><span class="court">Quadra ${court}</span><span class="m-tier ouro">🎾 Especial · 2h (11h–13h)</span></div>
       <div class="m-row"><input class="scorebox" style="width:auto;flex:1;text-align:left;padding:0 10px;font-size:13px;font-weight:600" placeholder="Jogador 1" value="${n.a||''}" onchange="setNadal('a',this.value)">
         ${scoreInput('nadal','x','ra',n.ra)}</div>
       <div class="m-vs">TAÇA NADAL</div>
@@ -857,7 +857,7 @@ function renderRegras(){
 
     <div class="rsec-h">Agenda</div>
     <div class="rules-text">
-      <b>10h00–14h30</b> — fase de grupos (5 quadras; a 5ª entra às 12h). <b>Taça Nadal</b> às <b>11h–12h</b> em uma quadra (jogo especial).<br>
+      <b>10h00–14h30</b> — fase de grupos (5 quadras; a 5ª entra às 12h). <b>Taça Nadal</b> às <b>11h–13h</b> em uma quadra (jogo especial de 2h).<br>
       <b>14h30–15h00</b> — pausa. <b>15h00–18h00</b> — mata-mata (Ouro e Prata), sets completos de 45 min. Final Ouro às 17h15.
     </div>`;
 }
