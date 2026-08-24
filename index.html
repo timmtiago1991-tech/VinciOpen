@@ -346,6 +346,13 @@ const ROSTER = {
   3:["Carlos Eduardo Martins","Gabriel Felzenszwalb","Gustavo Xavier","Philip Medley","Plinio Barbosa"],
   4:["Eike Rabelo","Gustavo Castro","Luis Guedes","Pedro Albuquerque","Victor Hugo Borges"]
 };
+// Resultado FIXO do sorteio — vagas A,B,C… já definidas dentro de cada pote.
+const DRAW = {
+  1:["Andre Nogueira","Bruno Zaremba","Mateus Maia","Daniel Doine","Matheus Canale","Thomaz Hadba"],
+  2:["Pedro Lopes","Leonardo Mattar Antunes","Ilan Nigri","Marco Antonio Franklin","Tiago Timm","Felipe Hallot"],
+  3:["Philip Medley","Gabriel Felzenszwalb","Gustavo Xavier","Plinio Barbosa","Carlos Eduardo Martins"],
+  4:["Luis Guedes","Gustavo Castro","Victor Hugo Borges","Eike Rabelo","Pedro Albuquerque"]
+};
 
 // Quadras: 0,1 = rápidas (10h-18h); 2,3 = saibro (10h-18h); 4 = saibro coberta (12h-18h)
 const COURTS = [
@@ -410,7 +417,6 @@ const BRACKET = {
 };
 
 const NAV = [
-  {id:"sorteio",   label:"Sorteio",       ico:'<path d="M4 4h6v6H4zM14 14h6v6h-6z"/><path d="M8 14h.01M6 16h.01M8 18h.01M16 6h.01M18 8h.01M16 8h.01"/>'},
   {id:"classificacao", label:"Classificação", ico:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'},
   {id:"jogos",     label:"Jogos",         ico:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'},
   {id:"chaves",    label:"Chaves",        ico:'<path d="M6 3v6a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v6M6 21v-6"/>'},
@@ -420,8 +426,8 @@ const NAV = [
 /* ============================================================ ESTADO */
 function defaultState(){
   const potes=JSON.parse(JSON.stringify(ROSTER));
-  const letters={1:[],2:[],3:[],4:[]};
-  return { potes, letters, drawDone:false, potesLocked:false, results:{}, finals:{}, nadal:{a:"",b:"",ra:null,rb:null}, tiebreaks:{} };
+  const letters=JSON.parse(JSON.stringify(DRAW));
+  return { potes, letters, drawDone:true, potesLocked:true, results:{}, finals:{}, nadal:{a:"",b:"",ra:null,rb:null}, tiebreaks:{} };
 }
 let S = defaultState();
 let VIEW = "classificacao";
@@ -443,12 +449,14 @@ function saveEverything(){
 }
 function initData(){
   try{ const raw=localStorage.getItem(LKEY); if(raw) S=Object.assign(defaultState(), JSON.parse(raw)); }catch(e){}
+  // Sorteio é fixo no código — ignora qualquer sorteio antigo salvo.
+  S.potes=JSON.parse(JSON.stringify(ROSTER)); S.letters=JSON.parse(JSON.stringify(DRAW)); S.drawDone=true; S.potesLocked=true;
   if(!DEMO && typeof firebase!=="undefined" && firebase.initializeApp){
     try{
       firebase.initializeApp(firebaseConfig);
       DBH=firebase.firestore(); LIVE=true;
       DBH.collection("config").doc("torneio").onSnapshot(d=>{
-        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.letters)S.letters=c.letters; S.drawDone=!!c.drawDone; S.potesLocked=!!c.potesLocked; if(c.nadal)S.nadal=c.nadal; S.tiebreaks=c.tiebreaks||{}; }
+        if(d.exists){ const c=d.data(); if(c.nadal)S.nadal=c.nadal; S.tiebreaks=c.tiebreaks||{}; }
         render();
       }, ()=>{});
       DBH.collection("resultados").onSnapshot(s=>{ s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, ()=>{});
