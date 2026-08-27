@@ -9,27 +9,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<!-- tema antes de pintar -->
 <script>try{if(localStorage.getItem("tt_theme")==="dark")document.documentElement.dataset.theme="dark";}catch(e){}</script>
 
-<!-- Firebase (compat) — mesmo padrão do Broslao -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
-/* ============================================================
-   Tokens — paleta institucional (referência RadarPE) + acentos esportivos
-   ============================================================ */
 :root{
   --navy:#0522A6; --blue:#123FD6; --blue-2:#1560E0; --cyan:#00AEEF;
   --teal:#2FA98E; --green:#6DBE45; --wine:#8E3A63;
   --gold:#C8871A; --gold-soft:#F5E9CF; --silver:#8390B4; --silver-soft:#E9ECF5;
+  --bronze:#A56A3A; --bronze-soft:#EFE0D2;
   --up:#2FA98E; --down:#8E3A63; --flat:#8C97B8; --live:#D2544E;
-
   --bg:#F5F7FB; --panel:#FFFFFF; --panel-2:#FBFCFE;
   --ink:#12204A; --ink-2:#4A567C; --ink-3:#8390B4;
   --line:#E4E9F4; --line-2:#EEF1F8; --brand-soft:#7FB0F2;
-
   --radius:12px; --radius-sm:8px;
   --shadow:0 1px 2px rgba(9,26,84,.06), 0 8px 24px rgba(9,26,84,.05);
 }
@@ -39,23 +33,18 @@ html[data-theme="dark"]{
   --ink:#EAEEFB; --ink-2:#A9B4DA; --ink-3:#6E7AA6;
   --line:#1E2853; --line-2:#182146; --brand-soft:#7FB0F2;
   --gold:#E0A526; --gold-soft:#33291020; --silver:#A9B4DA; --silver-soft:#1A2246;
+  --bronze:#C98A5A; --bronze-soft:#241a12;
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{
-  background:var(--bg); color:var(--ink);
-  font-family:Inter,'Helvetica Neue',Arial,sans-serif;
-  -webkit-font-smoothing:antialiased; line-height:1.5;
-  transition:background .25s ease,color .25s ease;
-}
+body{background:var(--bg); color:var(--ink); font-family:Inter,'Helvetica Neue',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; line-height:1.5; transition:background .25s ease,color .25s ease;}
 button{font-family:inherit; cursor:pointer}
 input,select{font-family:inherit}
 .num{font-variant-numeric:tabular-nums}
 
-/* ============================================================ HEADER (RadarPE) */
-.hdr{position:sticky; top:0; z-index:40;
-  background:linear-gradient(115deg,#123FD6 0%,#0522A6 100%);
+.hdr{position:sticky; top:0; z-index:40; background:linear-gradient(115deg,#123FD6 0%,#0522A6 100%);
   box-shadow:0 2px 10px rgba(5,34,166,.28); color:#fff;}
 .hdr__in{max-width:1200px; margin:0 auto; padding:0 24px; height:64px; display:flex; align-items:center; gap:26px;}
 .brand{display:flex; align-items:center; gap:11px; background:none; border:0; padding:0; cursor:pointer;}
@@ -82,7 +71,6 @@ input,select{font-family:inherit}
 .modechip .d{width:7px; height:7px; border-radius:50%; background:#D7F171}
 .modechip.demo .d{background:#F2C94C}
 
-/* ============================================================ LAYOUT */
 .wrap{max-width:1200px; margin:0 auto; padding:26px 24px 96px}
 .page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:20px; flex-wrap:wrap}
 .page-head h1{font-size:22px; font-weight:800; letter-spacing:-.02em; margin:0}
@@ -91,7 +79,6 @@ input,select{font-family:inherit}
 .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow)}
 .card-h{padding:14px 17px 0; display:flex; align-items:baseline; justify-content:space-between; gap:10px}
 .card-h h3{margin:0; font-size:14px; font-weight:700; letter-spacing:-.01em}
-.src{font-size:10.5px; color:var(--ink-3); font-weight:600}
 .btn{border-radius:9px; padding:9px 15px; font-size:13px; font-weight:700; border:1px solid var(--line); background:var(--panel); color:var(--ink-2)}
 .btn:hover{color:var(--ink); border-color:var(--ink-3)}
 .btn.primary{background:var(--blue); border-color:var(--blue); color:#fff}
@@ -102,17 +89,16 @@ input,select{font-family:inherit}
   border-radius:10px; padding:11px 14px; font-size:12.5px; color:var(--ink-2); margin-bottom:18px}
 .banner b{color:var(--ink)}
 
-/* ============================================================ GRUPOS/SECOES */
 .groupsec{margin-bottom:24px}
 .group-h{display:flex; align-items:center; gap:11px; margin:0 2px 12px}
 .gtag{font-weight:800; font-size:15px; color:#fff; background:linear-gradient(135deg,var(--blue),var(--navy));
   width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center}
 .group-h h3{margin:0; font-size:13px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-3); font-weight:800}
 .group-h .meta{font-size:11.5px; color:var(--ink-3); margin-left:auto; font-weight:600}
+
 .pote-badge{font-size:10px; font-weight:800; color:var(--ink-3); background:var(--panel-2); border:1px solid var(--line);
   border-radius:6px; padding:2px 6px; letter-spacing:.03em}
 
-/* ============================================================ CLASSIFICAÇÃO */
 .gt{width:100%; border-collapse:collapse; font-size:13px}
 .gt th,.gt td{padding:9px 12px; text-align:center; border-top:1px solid var(--line-2)}
 .gt th{font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); font-weight:700; border-top:0; background:var(--panel-2)}
@@ -121,14 +107,14 @@ input,select{font-family:inherit}
 .gt td.name{font-weight:700}
 .gt td.pp{font-weight:800; color:var(--blue)}
 .gt tr.q1 td.pos{color:var(--gold)} .gt tr.q1{background:linear-gradient(90deg,rgba(200,135,26,.09),transparent)}
-.gt tr.q2 td.pos{color:var(--silver)} .gt tr.q2{background:linear-gradient(90deg,rgba(131,144,180,.08),transparent)}
+.gt tr.q2 td.pos{color:var(--silver)}
+.gt tr.q3 td.pos{color:var(--bronze)}
 .qbadge{font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:5px; text-transform:uppercase; letter-spacing:.04em; margin-left:6px}
 .qbadge.ouro{background:var(--gold-soft); color:var(--gold); border:1px solid var(--gold)}
 .qbadge.prata{background:var(--silver-soft); color:var(--silver); border:1px solid var(--silver)}
-.qbadge.out{background:var(--panel-2); color:var(--ink-3); border:1px solid var(--line)}
+.qbadge.consol{background:var(--bronze-soft); color:var(--bronze); border:1px solid var(--bronze)}
 .qbadge.tbd{background:var(--panel-2); color:var(--ink-3); border:1px solid var(--line)}
 
-/* ============================================================ JOGOS / SCHEDULE */
 .phasetabs{display:flex; gap:2px; overflow-x:auto; border-bottom:1px solid var(--line); margin-bottom:16px}
 .phasetab{border:0; background:none; color:var(--ink-3); font-weight:700; font-size:13.5px; padding:11px 14px;
   white-space:nowrap; border-bottom:2px solid transparent}
@@ -142,32 +128,27 @@ input,select{font-family:inherit}
   border:1px solid var(--line); border-radius:999px; padding:3px 10px}
 .mgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:11px}
 .match{background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:12px 13px; box-shadow:var(--shadow)}
-.match.nadal{background:linear-gradient(120deg,rgba(200,135,26,.10),rgba(18,63,214,.05)); border-color:var(--gold)}
 .match.empty{opacity:.5; box-shadow:none; border-style:dashed}
 .m-top{display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:11px; color:var(--ink-3); font-weight:700}
 .court{background:var(--panel-2); border:1px solid var(--line); border-radius:6px; padding:2px 7px; letter-spacing:.02em}
-.court.saibro{background:rgba(200,135,26,.10); border-color:var(--gold); color:var(--gold)}
-.court.rapida{background:rgba(0,174,239,.10); border-color:var(--cyan); color:var(--cyan)}
 .m-tier{margin-left:auto; font-weight:800; letter-spacing:.03em}
-.m-tier.ouro{color:var(--gold)} .m-tier.prata{color:var(--silver)} .m-tier.grupo{color:var(--ink-3)}
+.m-tier.ouro{color:var(--gold)} .m-tier.prata{color:var(--silver)} .m-tier.consol{color:var(--bronze)} .m-tier.grupo{color:var(--ink-3)}
 .m-row{display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px; padding:5px 0}
 .m-row .pl{font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .m-row .pl.tbd{color:var(--ink-3); font-style:italic; font-weight:600}
 .m-row.win .pl{color:var(--green); font-weight:800}
-.m-row .pl .ptag{font-size:9.5px; font-weight:800; color:var(--ink-3); margin-left:5px; letter-spacing:.02em}
 .scorebox{width:46px; height:38px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink);
   border-radius:8px; text-align:center; font-size:17px; font-weight:800; font-variant-numeric:tabular-nums}
 .scorebox:focus{outline:2px solid var(--brand-soft); border-color:var(--blue)}
-.scorebox:disabled{opacity:.6}
 .m-vs{text-align:center; font-size:10px; color:var(--ink-3); font-weight:700; letter-spacing:.1em; margin:1px 0}
 
-/* ============================================================ CHAVES / BRACKET */
 .bracket-wrap{overflow-x:auto; padding-bottom:8px}
 .tier-h{display:flex; align-items:center; gap:10px; margin:6px 2px 14px}
 .tier-h .t{font-size:17px; font-weight:800; letter-spacing:-.01em}
 .tier-h .badge{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:3px 9px; border-radius:999px}
 .tier-h .badge.ouro{background:var(--gold-soft); color:var(--gold); border:1px solid var(--gold)}
 .tier-h .badge.prata{background:var(--silver-soft); color:var(--silver); border:1px solid var(--silver)}
+.tier-h .badge.consol{background:var(--bronze-soft); color:var(--bronze); border:1px solid var(--bronze)}
 .bracket{display:flex; gap:18px; align-items:stretch; min-width:min-content}
 .bcol{display:flex; flex-direction:column; justify-content:space-around; gap:14px; min-width:230px}
 .bcol-h{font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin-bottom:2px; text-align:center}
@@ -180,14 +161,13 @@ input,select{font-family:inherit}
 .brow.win .pl{color:var(--green); font-weight:800}
 .brow .sb{width:40px; height:32px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink);
   border-radius:7px; text-align:center; font-size:15px; font-weight:800}
-.brow .sb:disabled{opacity:.55}
 .champ{margin-top:10px; padding:13px; border-radius:11px; text-align:center; background:linear-gradient(135deg,var(--gold-soft),transparent); border:1px solid var(--gold)}
 .champ.prata{background:linear-gradient(135deg,var(--silver-soft),transparent); border-color:var(--silver)}
+.champ.consol{background:linear-gradient(135deg,var(--bronze-soft),transparent); border-color:var(--bronze)}
 .champ .lbl{font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
 .champ .nm{font-size:18px; font-weight:800; margin-top:3px}
 .champ .nm.tbd{color:var(--ink-3); font-style:italic; font-size:14px; font-weight:600}
 
-/* ============================================================ REGRAS */
 .rules-hero{display:flex; align-items:center; gap:16px; color:#fff; border-radius:14px; padding:20px 22px; margin:2px 0 20px;
   background:linear-gradient(120deg,#123FD6,#0522A6)}
 .rules-hero .rt{font-weight:800; font-size:21px; line-height:1.1}
@@ -196,7 +176,7 @@ input,select{font-family:inherit}
 .rules-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
 .rule-card{background:var(--panel); border:1px solid var(--line); border-radius:13px; padding:15px 16px; box-shadow:var(--shadow)}
 .rule-card .big{font-weight:800; font-size:26px; color:var(--blue)}
-.rule-card.gold .big{color:var(--gold)} .rule-card.silver .big{color:var(--silver)}
+.rule-card.gold .big{color:var(--gold)} .rule-card.silver .big{color:var(--silver)} .rule-card.bronze .big{color:var(--bronze)}
 .rule-card h4{font-weight:800; margin:4px 0 4px; font-size:14.5px}
 .rule-card p{margin:0; color:var(--ink-2); font-size:12.5px; line-height:1.5}
 .rtable{width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:13px; overflow:hidden; font-size:13.5px; box-shadow:var(--shadow)}
@@ -207,15 +187,13 @@ input,select{font-family:inherit}
 .rules-text{background:var(--panel); border:1px solid var(--line); border-radius:13px; padding:16px 18px; color:var(--ink-2); font-size:13.5px; line-height:1.85; box-shadow:var(--shadow)}
 .rules-text b{color:var(--ink)}
 
-/* ============================================================ SORTEIO / DRAFT */
 .potes-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-bottom:18px}
 .pote{background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); overflow:hidden}
 .pote-h{display:flex; align-items:center; gap:9px; padding:12px 14px; border-bottom:1px solid var(--line-2); background:var(--panel-2)}
 .pote-h .n{width:26px; height:26px; border-radius:7px; background:linear-gradient(135deg,var(--blue),var(--navy)); color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center}
 .pote-h .t{font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-2)}
 .pote-h .pos{margin-left:auto; font-size:10.5px; color:var(--ink-3); font-weight:700}
-.pote .inp{width:100%; border:0; border-top:1px solid var(--line-2); background:transparent; color:var(--ink);
-  padding:9px 14px; font-size:13.5px; font-weight:600}
+.pote .inp{width:100%; border:0; border-top:1px solid var(--line-2); background:transparent; color:var(--ink); padding:9px 14px; font-size:13.5px; font-weight:600}
 .pote .inp:focus{outline:0; background:var(--panel-2)}
 .pote .inp.done{color:var(--ink); font-weight:700}
 .draft-bar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:18px}
@@ -225,11 +203,11 @@ input,select{font-family:inherit}
 .stage .reveal-name.cycling{color:#D7F171; opacity:.9}
 .stage .reveal-dest{font-size:15px; font-weight:700; color:#fff; opacity:0; transition:opacity .3s}
 .stage .reveal-dest.show{opacity:1}
-.stage .reveal-dest .gtag2{display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 8px; border-radius:8px; background:#D7F171; color:#0522A6; font-weight:800; margin-left:6px; vertical-align:middle}
+.stage .reveal-dest .gtag2{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#D7F171; color:#0522A6; font-weight:800; margin-left:6px; vertical-align:middle}
 .stage .progress{position:absolute; bottom:12px; left:0; right:0; font-size:11px; color:rgba(255,255,255,.6); font-weight:600}
 .stage.pop{animation:pop .4s ease}
 @keyframes pop{0%{transform:scale(.98)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
-.mini-groups{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-top:18px}
+.mini-groups{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; margin-top:18px}
 .mini-g{background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:0; overflow:hidden; box-shadow:var(--shadow)}
 .mini-g .mh{display:flex; align-items:center; gap:8px; padding:9px 12px; background:var(--panel-2); border-bottom:1px solid var(--line-2)}
 .mini-g .mh .gtag{width:26px; height:26px; font-size:13px; border-radius:7px}
@@ -244,12 +222,10 @@ input,select{font-family:inherit}
 .confetti-c.go{display:block}
 .conf{position:absolute; top:-20px; width:9px; height:14px; border-radius:2px; animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(680deg); opacity:.9}}
-
 .toast{position:fixed; bottom:88px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--bg);
   padding:11px 18px; border-radius:10px; font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:.25s; z-index:90}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
-.seedcols{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start}
-@media (max-width:760px){ .seedcols{grid-template-columns:1fr} }
+.seedcols{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; align-items:start}
 .tiemark{display:inline-block; color:var(--wine); font-weight:800; margin-left:2px}
 .tiebox{margin:10px 2px 0; padding:13px 15px; border:1px solid var(--gold); border-radius:11px; background:linear-gradient(120deg,var(--gold-soft),transparent)}
 .tieh{font-size:13px; font-weight:800; color:var(--ink); margin-bottom:3px}
@@ -283,14 +259,11 @@ input,select{font-family:inherit}
 </head>
 <body>
 
-<!-- ============ HEADER ============ -->
 <header class="hdr">
   <div class="hdr__in">
     <button class="brand" onclick="go('classificacao')" aria-label="início">
       <span class="logo-chip"><img src="logo.png" alt="Vinci Compass" onerror="this.closest('.logo-chip').classList.add('fallback')"></span>
-      <span class="word">
-        <span class="word__name">Vinci Compass <em>Open</em></span>
-      </span>
+      <span class="word"><span class="word__name">Vinci Compass <em>Open</em></span></span>
     </button>
     <nav class="nav" id="nav"></nav>
     <div class="actions">
@@ -319,9 +292,7 @@ input,select{font-family:inherit}
 <div class="confetti-c" id="confetti"></div>
 
 <script>
-/* ============================================================
-   FIREBASE — mesmo padrão do Broslao. MODO DEMO enquanto apiKey tiver "COLE_AQUI".
-   ============================================================ */
+/* ====================== FIREBASE ====================== */
 const firebaseConfig = {
   apiKey:            "AIzaSyBjW5jkkDxNBLcdt20-vStSmiRChK5v7S8",
   authDomain:        "vinci-open.firebaseapp.com",
@@ -332,229 +303,255 @@ const firebaseConfig = {
   measurementId:     "G-GMB4H2ZX16"
 };
 const DEMO = String(firebaseConfig.apiKey).includes("COLE_AQUI");
-const LKEY = "vco_state_v2";
+const LKEY = "tt_state_v2";
 const ADMIN_CODE = "vinci26";
+/* coleções v2 (namespace novo para não colidir com o formato antigo de 6 grupos) */
+const C_RES="resultados_v2", C_FIN="finais_v2", C_CFG="config_v2", D_CFG="torneio";
 
-/* ============================================================ ESTRUTURA FIXA */
-// Potes (1 = mais forte). Tamanhos 6/6/5/5 (Felipe Hallot no Pote 2).
-const POTES = [1,2,3,4];
-const POTE_SIZE = {1:6, 2:6, 3:5, 4:5};
-const LETTERS = "ABCDEF";
-const ROSTER = {
-  1:["Bruno Zaremba","Daniel Doine","Mateus Maia","Matheus Canale","Thomaz Hadba","Andre Nogueira"],
-  2:["Pedro Lopes","Ilan Nigri","Leonardo Mattar Antunes","Marco Antonio Franklin","Tiago Timm","Felipe Hallot"],
-  3:["Carlos Eduardo Martins","Gabriel Felzenszwalb","Gustavo Xavier","Philip Medley","Plinio Barbosa"],
-  4:["Eike Rabelo","Gustavo Castro","Luis Guedes","Pedro Albuquerque","Victor Hugo Borges"]
-};
-// Resultado FIXO do sorteio — vagas A,B,C… já definidas dentro de cada pote.
-const DRAW = {
-  1:["Andre Nogueira","Bruno Zaremba","Mateus Maia","Daniel Doine","Matheus Canale","Thomaz Hadba"],
-  2:["Pedro Lopes","Leonardo Mattar Antunes","Ilan Nigri","Marco Antonio Franklin","Tiago Timm","Felipe Hallot"],
-  3:["Philip Medley","Gabriel Felzenszwalb","Gustavo Xavier","Plinio Barbosa","Carlos Eduardo Martins"],
-  4:["Luis Guedes","Gustavo Castro","Victor Hugo Borges","Eike Rabelo","Pedro Albuquerque"]
-};
+/* ====================== ESTRUTURA ====================== */
+const GROUPS = ["A","B","C","D","E","F","G"];   // 7 grupos de 3
 
-// Quadras: 0,1 = rápidas (10h-18h); 2,3 = saibro (10h-18h); 4 = saibro coberta (12h-18h)
-const COURTS = [
-  {name:"Rápida 1",       type:"rapida"},
-  {name:"Rápida 2",       type:"rapida"},
-  {name:"Saibro 1",       type:"saibro"},
-  {name:"Saibro 2",       type:"saibro"},
-  {name:"Saibro coberta", type:"saibro"}
-];
-
-// 33 jogos da classificação (pote-letra). id "1A" = Pote1 vaga A.
-const GAMES = [
-  {id:"M1",a:"1A",b:"2A"},{id:"M2",a:"1B",b:"2B"},{id:"M3",a:"1C",b:"2C"},{id:"M4",a:"1D",b:"2D"},
-  {id:"M5",a:"1E",b:"2E"},{id:"M6",a:"1E",b:"2F"},{id:"M7",a:"1F",b:"2E"},{id:"M8",a:"1F",b:"2F"},
-  {id:"M9",a:"1A",b:"3A"},{id:"M10",a:"1B",b:"3B"},{id:"M11",a:"1C",b:"3C"},{id:"M12",a:"1D",b:"3D"},{id:"M13",a:"1E",b:"3E"},
-  {id:"M14",a:"1A",b:"4A"},{id:"M15",a:"1B",b:"4B"},{id:"M16",a:"1C",b:"4C"},{id:"M17",a:"1D",b:"4D"},{id:"M18",a:"1F",b:"4E"},
-  {id:"M19",a:"2A",b:"3A"},{id:"M20",a:"2B",b:"3B"},{id:"M21",a:"2C",b:"3C"},{id:"M22",a:"2D",b:"3D"},{id:"M23",a:"2E",b:"3E"},
-  {id:"M24",a:"2A",b:"4A"},{id:"M25",a:"2B",b:"4B"},{id:"M26",a:"2C",b:"4C"},{id:"M27",a:"2D",b:"4D"},{id:"M28",a:"2F",b:"4E"},
-  {id:"M29",a:"3A",b:"4A"},{id:"M30",a:"3B",b:"4B"},{id:"M31",a:"3C",b:"4C"},{id:"M32",a:"3D",b:"4D"},{id:"M33",a:"3E",b:"4E"}
-];
-const GAME_BY_ID = {}; GAMES.forEach(g=> GAME_BY_ID[g.id]=g);
-
-// Grade classificatória (30 min/jogo). courts = 5 colunas (Q1..Q5). Nadal na coberta 12h–14h.
 const GROUP_SCHEDULE = [
-  {time:"10:00", courts:[{m:"M3"},{m:"M8"},{m:"M13"},{m:"M25"},null]},
-  {time:"10:30", courts:[{m:"M4"},{m:"M9"},{m:"M10"},{m:"M24"},null]},
-  {time:"11:00", courts:[{m:"M28"},{m:"M31"},{m:"M32"},null,null]},
-  {time:"11:30", courts:[{m:"M1"},{m:"M2"},{m:"M5"},{m:"M30"},null]},
-  {time:"12:00", courts:[{m:"M16"},{m:"M21"},{m:"M33"},null,{nadal:true}]},
-  {time:"12:30", courts:[{m:"M7"},{m:"M14"},{m:"M19"},{m:"M20"},{nadalCont:true}]},
-  {time:"13:00", courts:[{m:"M11"},{m:"M17"},{m:"M22"},{m:"M26"},{nadalCont:true}]},
-  {time:"13:30", courts:[{m:"M18"},{m:"M23"},{m:"M29"},null,{nadalCont:true}]},
-  {time:"14:00", courts:[{m:"M6"},{m:"M12"},{m:"M15"},{m:"M27"},null]}
+  {time:"10:00", courts:[{g:"A",i:1,j:2},{g:"B",i:1,j:2},{g:"C",i:1,j:2},{g:"D",i:1,j:2},{g:"E",i:1,j:2}]},
+  {time:"10:30", courts:[{g:"A",i:1,j:3},{g:"B",i:1,j:3},{g:"C",i:1,j:3},{g:"D",i:1,j:3},{g:"E",i:1,j:3}]},
+  {time:"11:00", courts:[{g:"F",i:1,j:2},{g:"G",i:1,j:2},{g:"A",i:2,j:3},{g:"B",i:2,j:3},{g:"C",i:2,j:3}]},
+  {time:"11:30", courts:[{g:"F",i:1,j:3},{g:"G",i:1,j:3},{g:"D",i:2,j:3},{g:"E",i:2,j:3},null]},
+  {time:"12:00", courts:[{g:"F",i:2,j:3},{g:"G",i:2,j:3},null,null,null]}
 ];
 
-// Finais (45 min/jogo). QF Ouro priorizando saibro (Q3,Q4,Q5). 15h–18h.
 const FINALS_SCHEDULE = [
-  {time:"15:00–15:45", lab:"Quartas", courts:["OQF4","PQF1","OQF1","OQF2","OQF3"]},
-  {time:"15:45–16:30", lab:"Quartas Prata + Semis Ouro", courts:["PQF2","PQF3","OSF1","OSF2","PQF4"]},
-  {time:"16:30–17:15", lab:"Semis Prata + Final/3º Ouro", courts:["PSF1","PSF2","OF","O3",null]},
-  {time:"17:15–18:00", lab:"Final/3º Prata", courts:[null,null,"PF","P3",null]}
+  {time:"13:00–13:45", courts:["OQF1","OQF2","OQF3","OQF4","CPI"]},
+  {time:"13:45–14:30", courts:["PQF1","PQF2","PQF3","PQF4","CSF2"]},
+  {time:"14:30–15:15", courts:["OSF1","OSF2","PSF1","PSF2","CSF1"]},
+  {time:"15:15–16:00", courts:["OF","PF","CF",null,null]}
 ];
 
-// Chaveamento. rank:n usa o ranking geral (Ouro 1-8, Prata 9-16).
 const BRACKET = {
-  OQF1:{tier:"ouro", label:"Quartas · Ouro 1", a:{rank:1}, b:{rank:8}},
-  OQF2:{tier:"ouro", label:"Quartas · Ouro 2", a:{rank:4}, b:{rank:5}},
-  OQF3:{tier:"ouro", label:"Quartas · Ouro 3", a:{rank:3}, b:{rank:6}},
-  OQF4:{tier:"ouro", label:"Quartas · Ouro 4", a:{rank:2}, b:{rank:7}},
+  OQF1:{tier:"ouro", label:"Quartas · Ouro 1", a:{oseed:1}, b:{oseed:8}},
+  OQF2:{tier:"ouro", label:"Quartas · Ouro 2", a:{oseed:4}, b:{oseed:5}},
+  OQF3:{tier:"ouro", label:"Quartas · Ouro 3", a:{oseed:3}, b:{oseed:6}},
+  OQF4:{tier:"ouro", label:"Quartas · Ouro 4", a:{oseed:2}, b:{oseed:7}},
   OSF1:{tier:"ouro", label:"Semi · Ouro 1", a:{win:"OQF1"}, b:{win:"OQF2"}},
   OSF2:{tier:"ouro", label:"Semi · Ouro 2", a:{win:"OQF3"}, b:{win:"OQF4"}},
   OF:{tier:"ouro", label:"Final · Ouro", a:{win:"OSF1"}, b:{win:"OSF2"}},
-  O3:{tier:"ouro", label:"3º lugar · Ouro", a:{lose:"OSF1"}, b:{lose:"OSF2"}},
-  PQF1:{tier:"prata", label:"Quartas · Prata 1", a:{rank:9}, b:{rank:16}},
-  PQF2:{tier:"prata", label:"Quartas · Prata 2", a:{rank:12}, b:{rank:13}},
-  PQF3:{tier:"prata", label:"Quartas · Prata 3", a:{rank:11}, b:{rank:14}},
-  PQF4:{tier:"prata", label:"Quartas · Prata 4", a:{rank:10}, b:{rank:15}},
+
+  PQF1:{tier:"prata", label:"Quartas · Prata 1", a:{pseed:1}, b:{pseed:8}},
+  PQF2:{tier:"prata", label:"Quartas · Prata 2", a:{pseed:4}, b:{pseed:5}},
+  PQF3:{tier:"prata", label:"Quartas · Prata 3", a:{pseed:3}, b:{pseed:6}},
+  PQF4:{tier:"prata", label:"Quartas · Prata 4", a:{pseed:2}, b:{pseed:7}},
   PSF1:{tier:"prata", label:"Semi · Prata 1", a:{win:"PQF1"}, b:{win:"PQF2"}},
   PSF2:{tier:"prata", label:"Semi · Prata 2", a:{win:"PQF3"}, b:{win:"PQF4"}},
   PF:{tier:"prata", label:"Final · Prata", a:{win:"PSF1"}, b:{win:"PSF2"}},
-  P3:{tier:"prata", label:"3º lugar · Prata", a:{lose:"PSF1"}, b:{lose:"PSF2"}}
+
+  CPI:{tier:"consol", label:"Repescagem · Consolação", a:{cseed:4}, b:{cseed:5}},
+  CSF2:{tier:"consol", label:"Semi · Consolação 2", a:{cseed:2}, b:{cseed:3}},
+  CSF1:{tier:"consol", label:"Semi · Consolação 1", a:{cseed:1}, b:{win:"CPI"}},
+  CF:{tier:"consol", label:"Final · Consolação", a:{win:"CSF1"}, b:{win:"CSF2"}}
 };
 
 const NAV = [
+  {id:"sorteio",   label:"Sorteio",       ico:'<path d="M4 4h6v6H4zM14 14h6v6h-6z"/><path d="M8 14h.01M6 16h.01M8 18h.01M16 6h.01M18 8h.01M16 8h.01"/>'},
   {id:"classificacao", label:"Classificação", ico:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'},
   {id:"jogos",     label:"Jogos",         ico:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'},
   {id:"chaves",    label:"Chaves",        ico:'<path d="M6 3v6a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v6M6 21v-6"/>'},
   {id:"regras",    label:"Regras",        ico:'<path d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v5h5"/>'}
 ];
 
-/* ============================================================ ESTADO */
+/* Inscritos por pote (1 = mais forte). 3 potes de 7 = 21 atletas. */
+const ROSTER = {
+  1:["Bruno Zaremba","Daniel Doine","Mateus Maia","Matheus Canale","Thomaz Hadba","Andre Nogueira","Ilan Nigri"],
+  2:["Pedro Lopes","Leonardo Antunes","Tiago Timm","Felipe Hallot","Plinio Barbosa","Carlos Eduardo Martins","Gabriel Felzenszwalb"],
+  3:["Gustavo Xavier","Philip Medley","Eike Rabelo","Gustavo Castro","Luis Guedes","Pedro Albuquerque","Victor Hugo Borges"]
+};
+
 function defaultState(){
-  const potes=JSON.parse(JSON.stringify(ROSTER));
-  const letters=JSON.parse(JSON.stringify(DRAW));
-  return { potes, letters, drawDone:true, potesLocked:true, results:{}, finals:{}, nadal:{a:"",b:"",ra:null,rb:null}, tiebreaks:{} };
+  const potes={1:ROSTER[1].slice(),2:ROSTER[2].slice(),3:ROSTER[3].slice()};
+  const groups={}; GROUPS.forEach(g=> groups[g]=[null,null,null]);
+  return { potes, groups, drawDone:false, groupsLocked:false, results:{}, finals:{}, tiebreaks:{} };
 }
 let S = defaultState();
 let VIEW = "classificacao";
 let PHASE = "grupos";
 
-/* ============================================================ PERSISTÊNCIA */
+/* ====================== PERSISTÊNCIA ====================== */
 let DBH=null, LIVE=false;
 function persistLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify(S)); }catch(e){} }
-function saveResult(id){ persistLocal(); if(LIVE&&DBH){ DBH.collection("resultados").doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}); } }
-function saveFinal(slot){ persistLocal(); if(LIVE&&DBH){ DBH.collection("finais").doc(slot).set(S.finals[slot]||{a:null,b:null}).catch(()=>{}); } }
-function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection("config").doc("torneio").set({potes:S.potes, letters:S.letters, drawDone:S.drawDone, potesLocked:S.potesLocked, nadal:S.nadal, tiebreaks:S.tiebreaks}).catch(()=>{}); } }
+function allGroupIds(){ const ids=[]; GROUPS.forEach(g=> groupPairs().forEach(([i,j])=> ids.push(mid(g,i,j)))); return ids; }
+function saveResult(id){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_RES).doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}); } }
+function saveFinal(slot){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_FIN).doc(slot).set(S.finals[slot]||{a:null,b:null}).catch(()=>{}); } }
+function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_CFG).doc(D_CFG).set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, groupsLocked:S.groupsLocked, tiebreaks:S.tiebreaks}).catch(()=>{}); } }
 function saveEverything(){
   persistLocal();
   if(LIVE&&DBH){
     saveConfig();
-    GAMES.forEach(g=> DBH.collection("resultados").doc(g.id).set(S.results[g.id]||{a:null,b:null}).catch(()=>{}));
-    Object.keys(BRACKET).forEach(s=> DBH.collection("finais").doc(s).set(S.finals[s]||{a:null,b:null}).catch(()=>{}));
+    allGroupIds().forEach(id=> DBH.collection(C_RES).doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}));
+    Object.keys(BRACKET).forEach(s=> DBH.collection(C_FIN).doc(s).set(S.finals[s]||{a:null,b:null}).catch(()=>{}));
   }
 }
 function initData(){
   try{ const raw=localStorage.getItem(LKEY); if(raw) S=Object.assign(defaultState(), JSON.parse(raw)); }catch(e){}
-  // Sorteio é fixo no código — ignora qualquer sorteio antigo salvo.
-  S.potes=JSON.parse(JSON.stringify(ROSTER)); S.letters=JSON.parse(JSON.stringify(DRAW)); S.drawDone=true; S.potesLocked=true;
   if(!DEMO && typeof firebase!=="undefined" && firebase.initializeApp){
     try{
       firebase.initializeApp(firebaseConfig);
       DBH=firebase.firestore(); LIVE=true;
-      DBH.collection("config").doc("torneio").onSnapshot(d=>{
-        if(d.exists){ const c=d.data(); if(c.nadal)S.nadal=c.nadal; S.tiebreaks=c.tiebreaks||{}; }
+      DBH.collection(C_CFG).doc(D_CFG).onSnapshot(d=>{
+        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; S.groupsLocked=!!c.groupsLocked; S.tiebreaks=c.tiebreaks||{}; }
         render();
       }, ()=>{});
-      DBH.collection("resultados").onSnapshot(s=>{ s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, ()=>{});
-      DBH.collection("finais").onSnapshot(s=>{ s.forEach(doc=> S.finals[doc.id]=doc.data()); render(); }, ()=>{});
+      DBH.collection(C_RES).onSnapshot(s=>{ s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, ()=>{});
+      DBH.collection(C_FIN).onSnapshot(s=>{ s.forEach(doc=> S.finals[doc.id]=doc.data()); render(); }, ()=>{});
     }catch(e){ LIVE=false; }
   }
   render();
 }
 
-/* ============================================================ HELPERS */
+/* ====================== HELPERS ====================== */
 const $ = (s,el=document)=> el.querySelector(s);
-function poteOf(pid){ return +pid[0]; }
-function letterIdx(pid){ return pid.charCodeAt(1)-65; }
-function isNamed(pid){ const p=poteOf(pid),i=letterIdx(pid); return !!(S.drawDone && S.letters[p] && S.letters[p][i]); }
-function pn(pid){ // nome do atleta ou rótulo Pn-X
-  if(!pid) return null;
-  const p=poteOf(pid), i=letterIdx(pid);
-  const v = S.drawDone && S.letters[p] && S.letters[p][i];
-  return v || ("P"+p+"-"+pid[1]);
-}
-function poteTag(pid){ return "P"+poteOf(pid); }
-function resultValid(r){ return r && r.a!=null && r.b!=null && r.a!=="" && r.b!==""; }
+function name(g,pos){ const v=S.groups[g] && S.groups[g][pos-1]; return v || (g+pos); }
+function isNamed(g,pos){ return !!(S.groups[g] && S.groups[g][pos-1]); }
+function mid(g,i,j){ return "G-"+g+"-"+i+"-"+j; }
+function groupPairs(){ return [[1,2],[1,3],[2,3]]; }   // round-robin de 3
 
-/* ============================================================ RANKING (22 atletas) */
-function allPids(){ const out=[]; POTES.forEach(p=>{ for(let i=0;i<POTE_SIZE[p];i++) out.push(p+LETTERS[i]); }); return out; }
-function allGamesComplete(){ return GAMES.every(g=> resultValid(S.results[g.id])); }
-function playedCount(){ return GAMES.filter(g=> resultValid(S.results[g.id])).length; }
-
-function computeRanking(){
-  const st={};
-  allPids().forEach(pid=> st[pid]={pid, name:pn(pid), pote:poteOf(pid), w:0, gw:0, gl:0, played:0});
-  GAMES.forEach(g=>{
-    const r=S.results[g.id];
-    if(resultValid(r)){
+function computeGroup(g){
+  const st={}; for(let p=1;p<=3;p++) st[p]={pos:p, name:name(g,p), w:0, gw:0, gl:0, played:0};
+  groupPairs().forEach(([i,j])=>{
+    const r=S.results[mid(g,i,j)];
+    if(r && r.a!=null && r.b!=null && r.a!=="" && r.b!==""){
       const a=+r.a, b=+r.b;
-      st[g.a].gw+=a; st[g.a].gl+=b; st[g.b].gw+=b; st[g.b].gl+=a; st[g.a].played++; st[g.b].played++;
-      if(a>b) st[g.a].w++; else if(b>a) st[g.b].w++;
+      st[i].gw+=a; st[i].gl+=b; st[j].gw+=b; st[j].gl+=a; st[i].played++; st[j].played++;
+      if(a>b) st[i].w++; else if(b>a) st[j].w++;
     }
   });
   Object.values(st).forEach(x=> x.saldo=x.gw-x.gl);
-  let arr=Object.values(st).sort((x,y)=> y.w-x.w || y.saldo-x.saldo || x.gl-y.gl || x.pid.localeCompare(y.pid));
-  // Tie-break manual: clusters idênticos em vitórias/saldo/games perdidos (2+)
-  const tieTag={};
+  const h2h=(x,y)=>{
+    for(const [i,j] of groupPairs()){
+      if((i===x&&j===y)||(i===y&&j===x)){
+        const r=S.results[mid(g,Math.min(i,j),Math.max(i,j))];
+        if(!r||r.a==null||r.b==null||r.a===""||r.b==="") return 0;
+        const lo=Math.min(i,j), a=+r.a,b=+r.b;
+        const winnerPos = a>b?lo:(b>a?Math.max(i,j):0);
+        if(!winnerPos) return 0;
+        return winnerPos===x?1:-1;
+      }
+    }
+    return 0;
+  };
+  let arr=[1,2,3].sort((a,b)=> st[b].w-st[a].w);
+  const out=[]; let k=0;
+  while(k<arr.length){
+    let m=k; while(m+1<arr.length && st[arr[m+1]].w===st[arr[k]].w) m++;
+    let cl=arr.slice(k,m+1);
+    if(cl.length===2){
+      const hh=h2h(cl[0],cl[1]);
+      if(hh!==0) cl = hh>0?[cl[0],cl[1]]:[cl[1],cl[0]];
+      else cl.sort((a,b)=> st[b].saldo-st[a].saldo || st[a].gl-st[b].gl);
+    } else if(cl.length>2){
+      cl.sort((a,b)=> st[b].saldo-st[a].saldo || st[a].gl-st[b].gl);
+      for(let z=0;z<cl.length-1;z++){
+        if(st[cl[z]].saldo===st[cl[z+1]].saldo && st[cl[z]].gl===st[cl[z+1]].gl){
+          if(h2h(cl[z],cl[z+1])<0){ const t=cl[z]; cl[z]=cl[z+1]; cl[z+1]=t; }
+        }
+      }
+    }
+    out.push(...cl); k=m+1;
+  }
+  const tieTag={}; let a=0;
+  while(a<out.length){
+    let b=a; while(b+1<out.length && st[out[b+1]].w===st[out[a]].w && st[out[b+1]].saldo===st[out[a]].saldo && st[out[b+1]].gl===st[out[a]].gl) b++;
+    if(b-a>=2){
+      const positions=out.slice(a,b+1);
+      const key='g'+g+'|'+positions.slice().sort((x,y)=>x-y).join('');
+      const order=(S.tiebreaks&&S.tiebreaks[key])||[];
+      const seg=positions.slice().sort((x,y)=>{ const ix=order.indexOf(String(x)), iy=order.indexOf(String(y)); return (ix<0?99:ix)-(iy<0?99:iy); });
+      for(let z=0;z<seg.length;z++) out[a+z]=seg[z];
+      const resolved=positions.every(p=> order.includes(String(p)));
+      positions.forEach(p=> tieTag[p]={key, members:positions.slice(), resolved});
+    }
+    a=b+1;
+  }
+  return out.map((pos,i)=> ({...st[pos], rank:i+1, tie: tieTag[pos]||null}));
+}
+function groupComplete(g){ return groupPairs().every(([i,j])=>{ const r=S.results[mid(g,i,j)]; return r&&r.a!=null&&r.b!=null&&r.a!==""&&r.b!==""; }); }
+function allGroupsComplete(){ return GROUPS.every(groupComplete); }
+
+/* Ranking entre grupos de quem terminou em determinada colocação (0=1º,1=2º,2=3º) */
+function rankPlace(place){
+  const arr = GROUPS.map(g=>{ const r=computeGroup(g); return {...r[place], g}; });
+  arr.sort((x,y)=> y.w-x.w || y.saldo-x.saldo || x.gl-y.gl || x.g.localeCompare(y.g));
   let a=0;
   while(a<arr.length){
     let b=a; while(b+1<arr.length && arr[b+1].w===arr[a].w && arr[b+1].saldo===arr[a].saldo && arr[b+1].gl===arr[a].gl) b++;
     if(b-a>=1){
-      const members=arr.slice(a,b+1).map(x=>x.pid);
-      const key='rk|'+members.slice().sort().join(',');
+      const grps=arr.slice(a,b+1).map(r=>r.g);
+      const key='p'+place+'|'+grps.slice().sort().join('');
       const order=(S.tiebreaks&&S.tiebreaks[key])||[];
-      const seg=arr.slice(a,b+1).sort((x,y)=>{ const ix=order.indexOf(x.pid), iy=order.indexOf(y.pid); return (ix<0?99:ix)-(iy<0?99:iy); });
-      const resolved=members.every(m=> order.includes(m));
-      for(let z=0;z<seg.length;z++){ arr[a+z]=seg[z]; }
-      members.forEach(m=> tieTag[m]={key, members:members.slice(), resolved});
+      const seg=arr.slice(a,b+1).sort((x,y)=>{ const ix=order.indexOf(x.g), iy=order.indexOf(y.g); return (ix<0?99:ix)-(iy<0?99:iy); });
+      const resolved=grps.every(gg=> order.includes(gg));
+      for(let z=0;z<seg.length;z++){ seg[z]._tie={key, members:grps.slice(), resolved}; arr[a+z]=seg[z]; }
     }
     a=b+1;
   }
-  return arr.map((x,i)=> ({...x, rank:i+1, tie: tieTag[x.pid]||null}));
-}
-let _rankCache=null, _rankKey=null;
-function ranking(){
-  const key=JSON.stringify([S.results,S.tiebreaks,S.letters,S.drawDone]);
-  if(_rankKey===key) return _rankCache;
-  _rankKey=key; _rankCache=computeRanking(); return _rankCache;
-}
-function rankArr(){ // 1-indexed array de pids segundo o ranking
-  const rk=ranking(); const arr=[null]; rk.forEach(r=> arr.push(r)); return arr;
+  return arr;
 }
 
-/* ============================================================ CHAVES */
+function buildSeeding(){
+  const leaders=rankPlace(0), seconds=rankPlace(1), thirds=rankPlace(2);
+  const gold=[null].concat(leaders.slice(0,7)); // 1..7 líderes
+  gold[8]=seconds[0];                           // melhor 2º
+  if(gold[8]&&gold[1]&&gold[8].g===gold[1].g){ const t=gold[7]; gold[7]=gold[8]; gold[8]=t; } // anti-reencontro
+  const silver=[null].concat(seconds.slice(1,7)); // 1..6 (2º restantes)
+  silver[7]=thirds[0]; silver[8]=thirds[1];       // 2 melhores 3º
+  if(silver[8]&&silver[1]&&silver[8].g===silver[1].g){ const t=silver[7]; silver[7]=silver[8]; silver[8]=t; }
+  const consol=[null].concat(thirds.slice(2,7));  // 1..5 (3º restantes)
+  return {gold, silver, consol, leaders, seconds, thirds};
+}
+let _seedCache=null,_seedKey=null;
+function seeding(){
+  const key=JSON.stringify([S.results,S.tiebreaks]);
+  if(_seedKey===key) return _seedCache;
+  _seedKey=key; _seedCache = allGroupsComplete()? buildSeeding() : null;
+  return _seedCache;
+}
+
 function resolveRef(ref){
-  if(ref.rank!=null){ return allGamesComplete()? rankArr()[ref.rank] : null; }
-  if(ref.win!=null){ return winnerOf(ref.win); }
-  if(ref.lose!=null){ return loserOf(ref.lose); }
+  const sd=seeding();
+  if(ref.oseed!=null) return sd? sd.gold[ref.oseed] : null;
+  if(ref.pseed!=null) return sd? sd.silver[ref.pseed] : null;
+  if(ref.cseed!=null) return sd? sd.consol[ref.cseed] : null;
+  if(ref.win!=null) return winnerOf(ref.win);
+  if(ref.lose!=null) return loserOf(ref.lose);
   return null;
 }
 function bracketPlayers(slot){ const b=BRACKET[slot]; return { a:resolveRef(b.a), b:resolveRef(b.b) }; }
 function winnerOf(slot){
   const p=bracketPlayers(slot), r=S.finals[slot];
-  if(!p.a||!p.b||!resultValid(r)||+r.a===+r.b) return null;
+  if(!p.a||!p.b||!r||r.a==null||r.b==null||r.a===""||r.b===""||+r.a===+r.b) return null;
   return (+r.a>+r.b)? p.a : p.b;
 }
 function loserOf(slot){
   const p=bracketPlayers(slot), r=S.finals[slot];
-  if(!p.a||!p.b||!resultValid(r)||+r.a===+r.b) return null;
+  if(!p.a||!p.b||!r||r.a==null||r.b==null||r.a===""||r.b===""||+r.a===+r.b) return null;
   return (+r.a>+r.b)? p.b : p.a;
 }
-function fpn(pl){ return pl? (pl.name || pn(pl.pid)) : null; }
-const SLOT_SHORT = {OQF1:"QF1",OQF2:"QF2",OQF3:"QF3",OQF4:"QF4",OSF1:"Semi 1",OSF2:"Semi 2",PQF1:"QF1",PQF2:"QF2",PQF3:"QF3",PQF4:"QF4",PSF1:"Semi 1",PSF2:"Semi 2"};
+function pname(pl){ return pl? (pl.name || (pl.g+(pl.rank||""))) : null; }
+
+const OSEED_LABEL={1:"1º líder",2:"2º líder",3:"3º líder",4:"4º líder",5:"5º líder",6:"6º líder",7:"7º líder",8:"Melhor 2º"};
+const PSEED_LABEL={1:"2º colocado",2:"2º colocado",3:"2º colocado",4:"2º colocado",5:"2º colocado",6:"2º colocado",7:"Melhor 3º",8:"2º melhor 3º"};
+const CSEED_LABEL={1:"3º (1)",2:"3º (2)",3:"3º (3)",4:"3º (4)",5:"3º (5)"};
+const SLOT_SHORT={OQF1:"QF1",OQF2:"QF2",OQF3:"QF3",OQF4:"QF4",OSF1:"Semi 1",OSF2:"Semi 2",
+  PQF1:"QF1",PQF2:"QF2",PQF3:"QF3",PQF4:"QF4",PSF1:"Semi 1",PSF2:"Semi 2",
+  CPI:"Repescagem",CSF1:"Semi 1",CSF2:"Semi 2"};
 function refLabel(ref){
   if(!ref) return "a definir";
-  if(ref.rank!=null) return ref.rank+"º geral";
+  if(ref.oseed!=null) return OSEED_LABEL[ref.oseed]||("Cabeça "+ref.oseed);
+  if(ref.pseed!=null) return PSEED_LABEL[ref.pseed]||("Prata "+ref.pseed);
+  if(ref.cseed!=null) return CSEED_LABEL[ref.cseed]||("Consol "+ref.cseed);
   if(ref.win!=null) return "Vencedor "+(SLOT_SHORT[ref.win]||ref.win);
   if(ref.lose!=null) return "Perdedor "+(SLOT_SHORT[ref.lose]||ref.lose);
   return "a definir";
 }
 
-/* ============================================================ NAV + ROTA */
+/* ====================== NAV / ROTA ====================== */
 function renderNav(){
   $("#nav").innerHTML = NAV.map(n=>`<button class="${VIEW===n.id?'on':''}" onclick="go('${n.id}')">
     <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${n.ico}</svg>
@@ -569,295 +566,301 @@ function render(){
   else if(VIEW==="jogos") app.innerHTML=renderJogos();
   else if(VIEW==="chaves") app.innerHTML=renderChaves();
   else if(VIEW==="regras") app.innerHTML=renderRegras();
-  const mc=$("#modechip");
-  const online = LIVE && !DEMO;
+  const mc=$("#modechip"); const online=LIVE&&!DEMO;
   mc.className="modechip"+(online?"":" demo");
   mc.querySelector(".lbl").textContent = DEMO? "modo demo" : (LIVE? "ao vivo" : "offline");
-  $("#foot").innerHTML = (online
-    ? "Placar ao vivo via Firebase/Firestore (projeto vinci-open)."
-    : (DEMO? "Modo demonstração — dados só neste navegador."
-           : "Sem conexão com o Firebase agora — usando dados locais deste navegador."))
-    + " · Formatação: RadarPE · Estrutura: BROS.lão · 22 atletas · 4 potes (6/6/5/5) · 33 jogos.";
+  $("#foot").innerHTML = (online ? "Placar ao vivo via Firebase/Firestore (projeto vinci-open)."
+    : (DEMO? "Modo demonstração — dados só neste navegador." : "Sem conexão com o Firebase agora — usando dados locais deste navegador."))
+    + " · 21 jogadores · 3 potes · 7 grupos de 3 · Ouro 8 · Prata 8 · Consolação 5.";
 }
 
-/* ============================================================ CLASSIFICAÇÃO */
-function destOf(rank){ return rank<=8?'ouro':(rank<=16?'prata':'out'); }
+/* ====================== CLASSIFICAÇÃO ====================== */
+function destBadge(g,pos){
+  const sd=buildSeeding();
+  const inGold = sd.gold.slice(1).some(p=>p&&p.g===g&&p.pos===pos);
+  const inSil  = sd.silver.slice(1).some(p=>p&&p.g===g&&p.pos===pos);
+  const inCon  = sd.consol.slice(1).some(p=>p&&p.g===g&&p.pos===pos);
+  if(inGold) return `<span class="qbadge ouro">Ouro</span>`;
+  if(inSil)  return `<span class="qbadge prata">Prata</span>`;
+  if(inCon)  return `<span class="qbadge consol">Consolação</span>`;
+  return "";
+}
 function renderClassificacao(){
-  const rk=ranking();
-  const complete=allGamesComplete();
-  const rows=rk.map(r=>{
-    const dest=destOf(r.rank);
-    const cls = r.rank<=8?'q1':(r.rank<=16?'q2':'');
-    const cut = (r.rank===9||r.rank===17) ? ' style="border-top:2px dashed var(--gold)"':'';
-    const badge = dest==='ouro'?'<span class="qbadge ouro">Ouro</span>'
-                 : dest==='prata'?'<span class="qbadge prata">Prata</span>'
-                 : '<span class="qbadge out">fora</span>';
-    return `<tr class="${cls}">
-      <td class="pos"${cut}>${r.rank}${r.tie&&!r.tie.resolved?' <span class="tiemark" title="empate a definir">=</span>':''}</td>
-      <td class="l name"${cut}>${r.name} <span class="pote-badge">P${r.pote}</span>${badge}</td>
-      <td class="pp num"${cut}>${r.w}</td>
-      <td class="num"${cut}>${r.played}</td>
-      <td class="num"${cut}>${r.gw}</td>
-      <td class="num"${cut}>${r.gl}</td>
-      <td class="num"${cut}>${r.saldo>0?'+':''}${r.saldo}</td></tr>`;
+  const secs=GROUPS.map(g=>{
+    const st=computeGroup(g), any=st.some(x=>x.played>0);
+    const rows=st.map(r=>`<tr class="${r.rank===1?'q1':r.rank===2?'q2':'q3'}">
+      <td class="pos">${r.rank}${r.tie&&!r.tie.resolved?' <span class="tiemark" title="empate a definir">=</span>':''}</td>
+      <td class="l name">${isNamed(g,r.pos)?r.name:(g+r.pos)} ${destBadge(g,r.pos)}</td>
+      <td class="pp num">${r.w}</td><td class="num">${r.played}</td>
+      <td class="num">${r.gw}</td><td class="num">${r.gl}</td>
+      <td class="num">${r.saldo>0?'+':''}${r.saldo}</td></tr>`).join("");
+    const seen={}; let panels="";
+    st.forEach(r=>{ if(r.tie && !seen[r.tie.key]){ seen[r.tie.key]=1;
+      const members=r.tie.members.map(pos=> ({id:String(pos), label:(isNamed(g,pos)?name(g,pos):(g+pos))}));
+      panels += tiePanel('Grupo '+g, r.tie.key, members);
+    }});
+    return `<div class="groupsec">
+      <div class="group-h"><span class="gtag">${g}</span><h3>Grupo ${g}</h3><span class="meta">${any?'parcial ao vivo':'sem resultados'}</span></div>
+      <div class="card"><table class="gt">
+        <thead><tr><th></th><th class="l">Atleta</th><th>V</th><th>J</th><th>GP</th><th>GC</th><th>Saldo</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>${panels}</div>`;
   }).join("");
-  // paineis de tie-break
-  const seen={}; let panels="";
-  rk.forEach(r=>{ if(r.tie && !seen[r.tie.key]){ seen[r.tie.key]=1;
-    const members=r.tie.members.map(pid=> ({id:pid, label:pn(pid)+' · P'+poteOf(pid)}));
-    panels += tiePanel('Empate no ranking', r.tie.key, members);
-  }});
 
-  const status = complete
-    ? `<div class="banner"><span>✅ <b>Classificação encerrada.</b> Chaves Ouro (1º–8º) e Prata (9º–16º) montadas na aba <b>Chaves</b>.</span></div>`
-    : `<div class="banner"><span>Ranking atualiza ao vivo conforme os placares entram na aba <b>Jogos</b> (${playedCount()}/33 jogos). Corte: <b>1º–8º Ouro</b>, <b>9º–16º Prata</b>, 17º–22º fora. Desempate: vitórias → saldo de games → games perdidos.</span></div>`;
+  const status = allGroupsComplete()
+    ? `<div class="banner"><span>✅ <b>Fase de grupos concluída.</b> Chaves Ouro, Prata e Consolação montadas na aba <b>Chaves</b>.</span></div>`
+    : `<div class="banner"><span>Classificação atualiza ao vivo conforme os placares entram na aba <b>Jogos</b>. Critérios de desempate na aba <b>Regras</b>.</span></div>`;
 
-  // Semeadura das chaves
-  const ra=rankArr();
-  const seedRow=(n,tier,qf)=>{ const pl=ra[n]; return `<tr>
-      <td class="pos">${n}</td>
-      <td class="l name">${pl?pl.name:'—'}</td>
-      <td class="num">${pl?('P'+pl.pote):'—'}</td>
-      <td><span class="qbadge ${tier}">${qf}</span></td></tr>`; };
-  const ouroSeed=[[1,'QF1'],[2,'QF4'],[3,'QF3'],[4,'QF2'],[5,'QF2'],[6,'QF3'],[7,'QF4'],[8,'QF1']]
-    .map(([n,q])=> seedRow(n,'ouro',q)).join("");
-  const prataSeed=[[9,'QF1'],[10,'QF4'],[11,'QF3'],[12,'QF2'],[13,'QF2'],[14,'QF3'],[15,'QF4'],[16,'QF1']]
-    .map(([n,q])=> seedRow(n,'prata',q)).join("");
-  const seedSection=`<div class="groupsec" style="margin-top:8px">
+  // ranking dos 2º
+  const secondsR = rankPlace(1);
+  const rr2 = secondsR.map((r,idx)=>{
+    const dest = idx===0?'ouro':'prata';
+    const cut = idx===1 ? ' style="border-top:2px dashed var(--gold)"' : '';
+    return `<tr class="${idx===0?'q1':'q2'}"><td class="pos"${cut}>${idx+1}${r._tie&&!r._tie.resolved?' <span class="tiemark">=</span>':''}</td>
+      <td class="l name"${cut}>${isNamed(r.g,r.pos)?r.name:(r.g+r.pos)} <span class="pote-badge">Grupo ${r.g}</span></td>
+      <td class="pp num"${cut}>${r.w}</td><td class="num"${cut}>${r.saldo>0?'+':''}${r.saldo}</td><td class="num"${cut}>${r.gl}</td>
+      <td${cut}><span class="qbadge ${dest}">${dest==='ouro'?'QF Ouro':'QF Prata'}</span></td></tr>`;
+  }).join("");
+  let p2="", s2={}; secondsR.forEach(r=>{ if(r._tie&&!s2[r._tie.key]){ s2[r._tie.key]=1;
+    const members=r._tie.members.map(gg=>{ const rr=secondsR.find(x=>x.g===gg); return {id:gg,label:(isNamed(gg,rr.pos)?name(gg,rr.pos):(gg+rr.pos))+' · Grupo '+gg}; });
+    p2+=tiePanel('2º colocados', r._tie.key, members); }});
+
+  // ranking dos 3º
+  const thirdsR = rankPlace(2);
+  const rr3 = thirdsR.map((r,idx)=>{
+    const dest = idx<2?'prata':'consol';
+    const cut = idx===2 ? ' style="border-top:2px dashed var(--silver)"' : '';
+    return `<tr class="${idx<2?'q2':'q3'}"><td class="pos"${cut}>${idx+1}${r._tie&&!r._tie.resolved?' <span class="tiemark">=</span>':''}</td>
+      <td class="l name"${cut}>${isNamed(r.g,r.pos)?r.name:(r.g+r.pos)} <span class="pote-badge">Grupo ${r.g}</span></td>
+      <td class="pp num"${cut}>${r.w}</td><td class="num"${cut}>${r.saldo>0?'+':''}${r.saldo}</td><td class="num"${cut}>${r.gl}</td>
+      <td${cut}><span class="qbadge ${dest}">${dest==='prata'?'QF Prata':'Consolação'}</span></td></tr>`;
+  }).join("");
+  let p3="", s3={}; thirdsR.forEach(r=>{ if(r._tie&&!s3[r._tie.key]){ s3[r._tie.key]=1;
+    const members=r._tie.members.map(gg=>{ const rr=thirdsR.find(x=>x.g===gg); return {id:gg,label:(isNamed(gg,rr.pos)?name(gg,rr.pos):(gg+rr.pos))+' · Grupo '+gg}; });
+    p3+=tiePanel('3º colocados', r._tie.key, members); }});
+
+  const runners = `<div class="groupsec" style="margin-top:8px">
+    <div class="group-h"><span class="gtag" style="background:linear-gradient(135deg,var(--silver),#5b6690)">2º</span>
+      <h3>Classificação dos 2º colocados</h3><span class="meta">${allGroupsComplete()?'definida':'parcial'} · melhor 2º vai à Ouro</span></div>
+    <div class="banner"><span>O <b>melhor 2º</b> completa a <b>Chave Ouro</b>; os <b>outros 6</b> vão à <b>Chave Prata</b>. Critério entre grupos: <b>vitórias → saldo → games perdidos</b>.</span></div>
+    <div class="card"><table class="gt"><thead><tr><th></th><th class="l">2º colocado</th><th>V</th><th>Saldo</th><th>GC</th><th>Destino</th></tr></thead><tbody>${rr2}</tbody></table></div>${p2}</div>`;
+
+  const thirdsSec = `<div class="groupsec" style="margin-top:8px">
+    <div class="group-h"><span class="gtag" style="background:linear-gradient(135deg,var(--bronze),#7a4d28)">3º</span>
+      <h3>Classificação dos 3º colocados</h3><span class="meta">${allGroupsComplete()?'definida':'parcial'} · 2 melhores vão à Prata</span></div>
+    <div class="banner"><span>Os <b>2 melhores 3º</b> completam a <b>Chave Prata</b>; os <b>outros 5</b> disputam o <b>Troféu Consolação</b>.</span></div>
+    <div class="card"><table class="gt"><thead><tr><th></th><th class="l">3º colocado</th><th>V</th><th>Saldo</th><th>GC</th><th>Destino</th></tr></thead><tbody>${rr3}</tbody></table></div>${p3}</div>`;
+
+  // semeadura
+  const sd=buildSeeding(); const complete=allGroupsComplete();
+  const oQF={1:'QF1',8:'QF1',4:'QF2',5:'QF2',3:'QF3',6:'QF3',2:'QF4',7:'QF4'};
+  const goldRows=[1,2,3,4,5,6,7,8].map(s=>{ const pl=sd.gold[s];
+    return `<tr><td class="pos">${s}</td><td class="l name">${pl?pl.name:'—'}</td><td class="num">${pl?pl.g:'—'}</td>
+      <td style="text-align:left">${s<=7?'Líder':'Melhor 2º'}</td><td><span class="qbadge ouro">${oQF[s]}</span></td></tr>`; }).join("");
+  const silRows=[1,2,3,4,5,6,7,8].map(s=>{ const pl=sd.silver[s];
+    return `<tr><td class="pos">${s}</td><td class="l name">${pl?pl.name:'—'}</td><td class="num">${pl?pl.g:'—'}</td>
+      <td style="text-align:left">${s<=6?'2º colocado':'3º colocado'}</td><td><span class="qbadge prata">${oQF[s]}</span></td></tr>`; }).join("");
+  const conRows=[1,2,3,4,5].map(s=>{ const pl=sd.consol[s];
+    return `<tr><td class="pos">${s}</td><td class="l name">${pl?pl.name:'—'}</td><td class="num">${pl?pl.g:'—'}</td></tr>`; }).join("");
+  const seedSec = `<div class="groupsec" style="margin-top:8px">
     <div class="group-h"><span class="gtag" style="background:linear-gradient(135deg,var(--navy),var(--blue))">⚑</span>
-      <h3>Semeadura das chaves</h3><span class="meta">${complete?'definida':'provisória'} · gera os confrontos</span></div>
-    <div class="banner"><span>Quartas (Ouro e Prata) seguem <b>1×8, 4×5, 3×6, 2×7</b> dentro de cada chave.${complete?'':' Ordem <b>provisória</b> até os 33 jogos terminarem.'}</span></div>
+      <h3>Semeadura das chaves</h3><span class="meta">${complete?'definida':'provisória'}</span></div>
+    <div class="banner"><span>Quartas (Ouro e Prata): <b>1×8, 4×5, 3×6, 2×7</b>. Consolação: repescagem 4×5, depois 1×venc. e 2×3.${complete?'':' Ordem <b>provisória</b> até todos os grupos terminarem.'}</span></div>
     <div class="seedcols">
-      <div class="card"><div class="card-h"><h3>Chave Ouro · 1º–8º</h3></div>
-        <table class="gt"><thead><tr><th></th><th class="l">Atleta</th><th>Pote</th><th>QF</th></tr></thead><tbody>${ouroSeed}</tbody></table></div>
-      <div class="card"><div class="card-h"><h3>Chave Prata · 9º–16º</h3></div>
-        <table class="gt"><thead><tr><th></th><th class="l">Atleta</th><th>Pote</th><th>QF</th></tr></thead><tbody>${prataSeed}</tbody></table></div>
+      <div class="card"><div class="card-h"><h3>Chave Ouro · 1–8</h3></div>
+        <table class="gt"><thead><tr><th></th><th class="l">Atleta</th><th>Grupo</th><th style="text-align:left">Origem</th><th>QF</th></tr></thead><tbody>${goldRows}</tbody></table></div>
+      <div class="card"><div class="card-h"><h3>Chave Prata · 1–8</h3></div>
+        <table class="gt"><thead><tr><th></th><th class="l">Atleta</th><th>Grupo</th><th style="text-align:left">Origem</th><th>QF</th></tr></thead><tbody>${silRows}</tbody></table></div>
+      <div class="card"><div class="card-h"><h3>Consolação · 1–5</h3></div>
+        <table class="gt"><thead><tr><th></th><th class="l">Atleta</th><th>Grupo</th></tr></thead><tbody>${conRows}</tbody></table></div>
     </div></div>`;
 
-  return `<div class="page-head"><div><h1>Classificação</h1><p>Ranking único dos 22 atletas (3 jogos cada). 1º–8º → Chave Ouro; 9º–16º → Chave Prata; 17º–22º encerram na classificatória.</p></div>
-    <div class="stamp">GP = games pró · GC = games contra</div></div>
-    ${status}
-    <div class="card"><table class="gt">
-      <thead><tr><th></th><th class="l">Atleta</th><th>V</th><th>J</th><th>GP</th><th>GC</th><th>Saldo</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
-    ${panels}
-    ${seedSection}`;
+  return `<div class="page-head"><div><h1>Classificação</h1><p>Ordenação por vitórias, confronto direto (empate de 2), saldo de games e games perdidos. 1º + melhor 2º → Ouro; demais 2º + 2 melhores 3º → Prata; 5 restantes → Consolação.</p></div>
+    <div class="stamp">GP = games pró · GC = games contra</div></div>${status}${secs}${runners}${thirdsSec}${seedSec}`;
 }
 
-/* ============================================================ JOGOS / SCHEDULE */
-function scoreInput(kind, id, side, val){
-  const v = val==null?"":val;
-  return `<input class="scorebox num" inputmode="numeric" maxlength="2" value="${v}"
-    onchange="setScore('${kind}','${id}','${side}',this.value)" aria-label="games ${side}">`;
+/* ====================== JOGOS ====================== */
+function scoreInput(kind,id,side,val){ const v=val==null?"":val;
+  return `<input class="scorebox num" inputmode="numeric" maxlength="2" value="${v}" onchange="setScore('${kind}','${id}','${side}',this.value)" aria-label="games ${side}">`; }
+function groupMatchCard(entry,court){
+  if(!entry) return `<div class="match empty"><div class="m-top"><span class="court">Quadra ${court}</span><span class="m-tier grupo">livre</span></div><div class="m-vs">— sem jogo —</div></div>`;
+  const {g,i,j}=entry, id=mid(g,i,j), r=S.results[id]||{};
+  const a=r.a,b=r.b, aw=(a!=null&&b!=null&&a!==""&&b!==""&&+a>+b), bw=(a!=null&&b!=null&&a!==""&&b!==""&&+b>+a);
+  return `<div class="match"><div class="m-top"><span class="court">Quadra ${court}</span><span class="gtag" style="width:22px;height:22px;font-size:11px;border-radius:6px">${g}</span><span class="m-tier grupo">Grupo ${g}</span></div>
+    <div class="m-row ${aw?'win':''}"><span class="pl ${isNamed(g,i)?'':'tbd'}">${name(g,i)}</span>${scoreInput('group',id,'a',a)}</div>
+    <div class="m-vs">SET 4 GAMES</div>
+    <div class="m-row ${bw?'win':''}"><span class="pl ${isNamed(g,j)?'':'tbd'}">${name(g,j)}</span>${scoreInput('group',id,'b',b)}</div></div>`;
 }
-function courtChip(ci){ const c=COURTS[ci]; return `<span class="court ${c.type}">${c.name}</span>`; }
-function nadalCard(ci, cont){
-  if(cont){
-    return `<div class="match nadal"><div class="m-top">${courtChip(ci)}<span class="m-tier ouro">🎾 Especial</span></div>
-      <div class="m-vs" style="margin-top:14px">🎾 TAÇA NADAL</div>
-      <div style="text-align:center;font-size:11.5px;color:var(--ink-3);font-weight:600;padding:6px 0 2px">jogo único de 2h · em andamento (12h–14h)</div></div>`;
-  }
-  const n=S.nadal;
-  return `<div class="match nadal"><div class="m-top">${courtChip(ci)}<span class="m-tier ouro">🎾 Especial · 2h (12h–14h)</span></div>
-    <div class="m-row"><input class="scorebox" style="width:auto;flex:1;text-align:left;padding:0 10px;font-size:13px;font-weight:600" placeholder="Jogador 1" value="${(n.a||'').replace(/"/g,'&quot;')}" onchange="setNadal('a',this.value)">
-      ${scoreInput('nadal','x','ra',n.ra)}</div>
-    <div class="m-vs">TAÇA NADAL</div>
-    <div class="m-row"><input class="scorebox" style="width:auto;flex:1;text-align:left;padding:0 10px;font-size:13px;font-weight:600" placeholder="Jogador 2" value="${(n.b||'').replace(/"/g,'&quot;')}" onchange="setNadal('b',this.value)">
-      ${scoreInput('nadal','x','rb',n.rb)}</div></div>`;
-}
-function emptyCard(ci){ return `<div class="match empty"><div class="m-top">${courtChip(ci)}<span class="m-tier grupo">livre</span></div><div class="m-vs">— sem jogo —</div></div>`; }
-function groupMatchCard(cell, ci){
-  if(!cell) return emptyCard(ci);
-  if(cell.nadal) return nadalCard(ci,false);
-  if(cell.nadalCont) return nadalCard(ci,true);
-  const g=GAME_BY_ID[cell.m], id=g.id, r=S.results[id]||{};
-  const a=r.a,b=r.b, aw=(resultValid(r)&&+a>+b), bw=(resultValid(r)&&+b>+a);
-  return `<div class="match"><div class="m-top">${courtChip(ci)}<span class="m-tier grupo">${cell.m}</span></div>
-    <div class="m-row ${aw?'win':''}"><span class="pl ${isNamed(g.a)?'':'tbd'}">${pn(g.a)}<span class="ptag">${poteTag(g.a)}</span></span>${scoreInput('group',id,'a',a)}</div>
-    <div class="m-vs">SET ATÉ 4 · 30 MIN</div>
-    <div class="m-row ${bw?'win':''}"><span class="pl ${isNamed(g.b)?'':'tbd'}">${pn(g.b)}<span class="ptag">${poteTag(g.b)}</span></span>${scoreInput('group',id,'b',b)}</div></div>`;
-}
-function bracketMatchCardSchedule(slot, ci){
-  if(!slot) return emptyCard(ci);
+function bracketMatchCardSchedule(slot,court){
+  if(!slot) return `<div class="match empty"><div class="m-top"><span class="court">Quadra ${court}</span></div><div class="m-vs">— sem jogo —</div></div>`;
   const b=BRACKET[slot], p=bracketPlayers(slot), r=S.finals[slot]||{};
-  const na=fpn(p.a), nb=fpn(p.b);
-  const a=r.a,bb=r.b, aw=(resultValid(r)&&+a>+bb), bw=(resultValid(r)&&+bb>+a);
-  return `<div class="match"><div class="m-top">${courtChip(ci)}<span class="m-tier ${b.tier}">${b.tier==='ouro'?'Ouro':'Prata'}</span></div>
+  const na=pname(p.a), nb=pname(p.b);
+  const a=r.a,bb=r.b, aw=(a!=null&&bb!=null&&a!==""&&bb!==""&&+a>+bb), bw=(a!=null&&bb!=null&&a!==""&&bb!==""&&+bb>+a);
+  const tname=b.tier==='ouro'?'Ouro':b.tier==='prata'?'Prata':'Consolação';
+  const setlbl=b.tier==='consol'?'SET 4 GAMES':'SET CONVENCIONAL';
+  return `<div class="match"><div class="m-top"><span class="court">Quadra ${court}</span><span class="m-tier ${b.tier}">${tname}</span></div>
     <div class="m-row ${aw?'win':''}"><span class="pl ${na?'':'tbd'}">${na||refLabel(b.a)}</span>${scoreInput('final',slot,'a',a)}</div>
-    <div class="m-vs">${b.label.toUpperCase()}</div>
+    <div class="m-vs">${b.label.toUpperCase()} · ${setlbl}</div>
     <div class="m-row ${bw?'win':''}"><span class="pl ${nb?'':'tbd'}">${nb||refLabel(b.b)}</span>${scoreInput('final',slot,'b',bb)}</div></div>`;
 }
 function renderJogos(){
   const tabs=`<div class="phasetabs">
-    <button class="phasetab ${PHASE==='grupos'?'on':''}" onclick="setPhase('grupos')">Classificatória</button>
+    <button class="phasetab ${PHASE==='grupos'?'on':''}" onclick="setPhase('grupos')">Fase de grupos</button>
     <button class="phasetab ${PHASE==='finais'?'on':''}" onclick="setPhase('finais')">Fases finais</button></div>`;
   let body="";
   if(PHASE==="grupos"){
     body=GROUP_SCHEDULE.map((rnd,idx)=>{
-      const cards=rnd.courts.map((c,ci)=> groupMatchCard(c, ci)).join("");
-      const isLast = idx===GROUP_SCHEDULE.length-1;
-      return `<div class="round"><div class="round-h"><span class="t num">${rnd.time}</span><span class="lab">rodada ${idx+1}</span>${isLast?'<span class="break">pausa 14h30–15h00</span>':''}</div>
-        <div class="mgrid">${cards}</div></div>`;
+      const cards=rnd.courts.map((c,ci)=> groupMatchCard(c,ci+1)).join("");
+      const isLast=idx===GROUP_SCHEDULE.length-1;
+      return `<div class="round"><div class="round-h"><span class="t num">${rnd.time}</span><span class="lab">onda ${idx+1}</span>${isLast?'<span class="break">pausa 12h30–13h00</span>':''}</div><div class="mgrid">${cards}</div></div>`;
     }).join("");
   } else {
-    const note = allGamesComplete()? "" : `<div class="banner"><span>Os confrontos preenchem automaticamente quando a classificatória terminar (${playedCount()}/33). QF da Ouro priorizam as quadras de saibro.</span></div>`;
+    const note = allGroupsComplete()? "" : `<div class="banner"><span>Os confrontos vão sendo preenchidos automaticamente conforme a fase de grupos termina. Já dá para lançar placar assim que os nomes aparecem.</span></div>`;
     body=note+FINALS_SCHEDULE.map(rnd=>{
-      const cards=rnd.courts.map((c,ci)=> bracketMatchCardSchedule(c, ci)).join("");
-      return `<div class="round"><div class="round-h"><span class="t num">${rnd.time}</span><span class="lab">${rnd.lab} · 1 set · 45 min</span></div>
-        <div class="mgrid">${cards}</div></div>`;
+      const cards=rnd.courts.map((c,ci)=> bracketMatchCardSchedule(c,ci+1)).join("");
+      return `<div class="round"><div class="round-h"><span class="t num">${rnd.time}</span><span class="lab">Ouro/Prata: set convencional · Consolação: 4 games</span></div><div class="mgrid">${cards}</div></div>`;
     }).join("");
   }
-  return `<div class="page-head"><div><h1>Jogos</h1><p>Placar por quadra e horário. Insira os games — o ranking e as chaves atualizam sozinhos${DEMO?'':' e sincronizam ao vivo'}.</p></div>
-    <div class="stamp">5 quadras · 30 min (classif.) / 45 min (finais)</div></div>${tabs}${body}`;
+  return `<div class="page-head"><div><h1>Jogos</h1><p>Placar por quadra e horário. Insira os games de cada set${DEMO?'':' — classificação e chaves sincronizam ao vivo'}.</p></div>
+    <div class="stamp">5 quadras · grupos 4 games (30 min) · finais convencional</div></div>${tabs}${body}`;
 }
 function setPhase(p){ PHASE=p; render(); }
 
-/* ============================================================ CHAVES / BRACKET */
-function brow(slot, side){
+/* ====================== CHAVES ====================== */
+function brow(slot,side){
   const b=BRACKET[slot], p=bracketPlayers(slot), r=S.finals[slot]||{};
-  const pl = side==='a'? p.a : p.b;
-  const nm = fpn(pl);
-  const val = side==='a'? r.a : r.b;
-  const other = side==='a'? r.b : r.a;
-  const win = (val!=null&&other!=null&&val!==""&&other!==""&&+val>+other);
+  const pl=side==='a'?p.a:p.b, nm=pname(pl);
+  const val=side==='a'?r.a:r.b, other=side==='a'?r.b:r.a;
+  const win=(val!=null&&other!=null&&val!==""&&other!==""&&+val>+other);
   return `<div class="brow ${win?'win':''}"><span class="pl ${nm?'':'tbd'}">${nm||refLabel(side==='a'?b.a:b.b)}</span>
     <input class="sb num" inputmode="numeric" maxlength="2" value="${val==null?'':val}" onchange="setScore('final','${slot}','${side}',this.value)"></div>`;
 }
 function bmatch(slot){ const b=BRACKET[slot]; return `<div class="bmatch"><div class="bm-h">${b.label}</div>${brow(slot,'a')}${brow(slot,'b')}</div>`; }
 function renderChaves(){
-  const gate = allGamesComplete()? "" : `<div class="banner"><span>🔒 As chaves são semeadas quando os <b>33 jogos</b> da classificatória terminarem (${playedCount()}/33). Ouro = 1º–8º; Prata = 9º–16º. Até lá, os confrontos aparecem como "a definir".</span></div>`;
-  const goldChamp=winnerOf("OF"), silverChamp=winnerOf("PF");
-  const ouro=`<div class="tier-h"><span class="t">Chave Ouro</span><span class="badge ouro">1º–8º · quartas</span></div>
+  const sd=seeding();
+  const gate = sd? "" : `<div class="banner"><span>🔒 As chaves são semeadas automaticamente quando <b>todos os grupos terminarem</b>. Até lá os confrontos aparecem como "a definir".</span></div>`;
+  const oC=winnerOf("OF"), pC=winnerOf("PF"), cC=winnerOf("CF");
+  const ouro=`<div class="tier-h"><span class="t">Chave Ouro</span><span class="badge ouro">8 atletas · quartas</span></div>
     <div class="bracket-wrap"><div class="bracket">
       <div class="bcol"><div class="bcol-h">Quartas</div>${bmatch("OQF1")}${bmatch("OQF2")}${bmatch("OQF3")}${bmatch("OQF4")}</div>
       <div class="bcol"><div class="bcol-h">Semifinais</div>${bmatch("OSF1")}${bmatch("OSF2")}</div>
-      <div class="bcol"><div class="bcol-h">Final &amp; 3º</div>${bmatch("OF")}${bmatch("O3")}
-        <div class="champ"><div class="lbl">Campeão Ouro</div><div class="nm ${goldChamp?'':'tbd'}">${goldChamp?fpn(goldChamp):'a definir'}</div></div></div>
+      <div class="bcol"><div class="bcol-h">Final</div>${bmatch("OF")}
+        <div class="champ"><div class="lbl">Campeão Ouro</div><div class="nm ${oC?'':'tbd'}">${oC?pname(oC):'a definir'}</div></div></div>
     </div></div>`;
-  const prata=`<div class="tier-h" style="margin-top:26px"><span class="t">Chave Prata</span><span class="badge prata">9º–16º · quartas</span></div>
+  const prata=`<div class="tier-h" style="margin-top:26px"><span class="t">Chave Prata</span><span class="badge prata">8 atletas · quartas</span></div>
     <div class="bracket-wrap"><div class="bracket">
       <div class="bcol"><div class="bcol-h">Quartas</div>${bmatch("PQF1")}${bmatch("PQF2")}${bmatch("PQF3")}${bmatch("PQF4")}</div>
       <div class="bcol"><div class="bcol-h">Semifinais</div>${bmatch("PSF1")}${bmatch("PSF2")}</div>
-      <div class="bcol"><div class="bcol-h">Final &amp; 3º</div>${bmatch("PF")}${bmatch("P3")}
-        <div class="champ prata"><div class="lbl">Campeão Prata</div><div class="nm ${silverChamp?'':'tbd'}">${silverChamp?fpn(silverChamp):'a definir'}</div></div></div>
+      <div class="bcol"><div class="bcol-h">Final</div>${bmatch("PF")}
+        <div class="champ prata"><div class="lbl">Campeão Prata</div><div class="nm ${pC?'':'tbd'}">${pC?pname(pC):'a definir'}</div></div></div>
     </div></div>`;
-  return `<div class="page-head"><div><h1>Chaves</h1><p>Mata-mata de 1 set (45 min). Vencedores avançam automaticamente conforme os placares entram.</p></div>
-    <div class="stamp">QF 1×8 · 4×5 · 3×6 · 2×7</div></div>${gate}${ouro}${prata}`;
+  const consol=`<div class="tier-h" style="margin-top:26px"><span class="t">Troféu Consolação</span><span class="badge consol">5 atletas · repescagem</span></div>
+    <div class="bracket-wrap"><div class="bracket">
+      <div class="bcol"><div class="bcol-h">Repescagem</div>${bmatch("CPI")}</div>
+      <div class="bcol"><div class="bcol-h">Semifinais</div>${bmatch("CSF1")}${bmatch("CSF2")}</div>
+      <div class="bcol"><div class="bcol-h">Final</div>${bmatch("CF")}
+        <div class="champ consol"><div class="lbl">Campeão Consolação</div><div class="nm ${cC?'':'tbd'}">${cC?pname(cC):'a definir'}</div></div></div>
+    </div></div>`;
+  return `<div class="page-head"><div><h1>Chaves</h1><p>Mata-mata. Ouro e Prata em sets convencionais; Consolação em sets de 4 games. Vencedores avançam sozinhos conforme os placares entram.</p></div>
+    <div class="stamp">QF 1×8 · 4×5 · 3×6 · 2×7</div></div>${gate}${ouro}${prata}${consol}`;
 }
 
-/* ============================================================ REGRAS */
+/* ====================== REGRAS ====================== */
 function renderRegras(){
   return `<div class="rules-hero"><div><div class="rt">Regulamento</div>
-    <div class="rs">22 atletas em 4 potes (6/6/5/5). Fase classificatória: 3 jogos por atleta, sets até 4 games (no-ad). Ranking único define Ouro (1º–8º) e Prata (9º–16º) no mata-mata.</div></div></div>
+    <div class="rs">21 atletas, 3 potes, 7 grupos de 3. Grupos em sets de 4 games (no-ad); fases finais em sets convencionais. Três chaves: Ouro, Prata e Consolação.</div></div></div>
 
     <div class="rsec-h">Formato</div>
     <div class="rules-grid">
-      <div class="rule-card"><div class="big">3</div><h4>Jogos por atleta</h4><p>Cada atleta enfrenta adversários de potes distintos. 33 jogos no total, sets até 4 games (no-ad), ~30 min.</p></div>
-      <div class="rule-card"><div class="big">1º–22º</div><h4>Ranking único</h4><p>Uma classificação geral consolidada, sem grupos. Corte no 8º e no 16º.</p></div>
-      <div class="rule-card gold"><div class="big">8</div><h4>Chave Ouro</h4><p>1º ao 8º do ranking. Começa nas quartas de final. QF priorizam as quadras de saibro.</p></div>
-      <div class="rule-card silver"><div class="big">8</div><h4>Chave Prata</h4><p>9º ao 16º do ranking. Também começa nas quartas de final.</p></div>
+      <div class="rule-card"><div class="big">7×3</div><h4>Grupos</h4><p>Sete grupos de três, todos contra todos. Cada atleta joga 2 partidas na fase de grupos.</p></div>
+      <div class="rule-card"><div class="big">4</div><h4>Set curto (grupos)</h4><p>Set de 4 games, no-ad. ~30 min por jogo. 21 jogos das 10h às 12h30.</p></div>
+      <div class="rule-card gold"><div class="big">8</div><h4>Chave Ouro</h4><p>7 líderes de grupo + o melhor 2º colocado. Começa nas quartas.</p></div>
+      <div class="rule-card silver"><div class="big">8</div><h4>Chave Prata</h4><p>Os outros 6 segundos + os 2 melhores terceiros. Começa nas quartas.</p></div>
+      <div class="rule-card bronze"><div class="big">5</div><h4>Consolação</h4><p>Os 5 terceiros restantes. Repescagem, semifinais e final, em sets de 4 games.</p></div>
     </div>
 
     <div class="rsec-h">Classificação — critérios de desempate</div>
-    <table class="rtable">
-      <thead><tr><th style="width:34px">#</th><th>Critério</th><th>Observação</th></tr></thead>
+    <table class="rtable"><thead><tr><th style="width:34px">#</th><th>Critério</th><th>Observação</th></tr></thead>
       <tbody>
-        <tr><td><b>1</b></td><td>Número de vitórias</td><td>Partidas ganhas nos 3 jogos.</td></tr>
-        <tr><td><b>2</b></td><td>Saldo de games</td><td>Games ganhos − games perdidos.</td></tr>
-        <tr><td><b>3</b></td><td>Menor nº de games perdidos</td><td>Equivale a maior % de games ganhos.</td></tr>
-        <tr><td><b>4</b></td><td>Tie-break (super tie-break na quadra)</td><td>Persistindo o empate, joga-se um tie-break decisivo. O organizador registra a ordem no app (na Classificação) e ela é aplicada automaticamente.</td></tr>
-      </tbody>
-    </table>
+        <tr><td><b>1</b></td><td>Número de vitórias</td><td>Partidas ganhas nos 2 jogos do grupo.</td></tr>
+        <tr><td><b>2</b></td><td>Confronto direto (empate de 2)</td><td>Quem venceu o jogo entre os dois.</td></tr>
+        <tr><td><b>3</b></td><td>Saldo de games</td><td>Games ganhos − games perdidos no grupo.</td></tr>
+        <tr><td><b>4</b></td><td>Menor nº de games perdidos</td><td>Equivale a maior % de games ganhos.</td></tr>
+        <tr><td><b>5</b></td><td>Tie-break decisivo na quadra</td><td>Persistindo o empate (inclusive triplo, comum em grupo de 3), joga-se um tie-break. O organizador registra a ordem na Classificação e ela é aplicada sozinha.</td></tr>
+      </tbody></table>
 
-    <div class="rsec-h">Chaveamento</div>
+    <div class="rsec-h">Avanço e chaveamento</div>
     <div class="rules-text">
-      Os <b>8 primeiros</b> do ranking formam a <b>Chave Ouro</b> e os <b>9º ao 16º</b> a <b>Chave Prata</b>; ambas começam nas <b>quartas de final</b>. Do 17º ao 22º encerram na classificatória.<br>
-      Quartas (em cada chave): <b>1×8, 4×5, 3×6, 2×7</b> (na Prata, lendo 9º=1, 10º=2, … 16º=8). Semifinais, final e disputa de 3º lugar em seguida.<br>
-      Nas quartas, a <b>Chave Ouro tem prioridade nas quadras de saibro</b>.
+      Todos avançam após os grupos. Os <b>7 líderes</b> e o <b>melhor 2º</b> formam a <b>Chave Ouro</b> (8, quartas). Os <b>outros 6 segundos</b> e os <b>2 melhores terceiros</b> formam a <b>Chave Prata</b> (8, quartas). Os <b>5 terceiros restantes</b> disputam o <b>Troféu Consolação</b>.<br>
+      Para eleger o melhor 2º, os 2 melhores 3º e ordenar os cabeças, compara-se entre grupos por <b>vitórias → saldo de games → games perdidos</b> (todos jogaram 2 partidas).<br>
+      Quartas (Ouro e Prata): <b>1×8, 4×5, 3×6, 2×7</b>. Regra anti-reencontro: se o melhor 2º cairia contra o líder do próprio grupo, invertem-se os cabeças 7 e 8.
     </div>
 
-    <div class="rsec-h">Quadras &amp; agenda</div>
+    <div class="rsec-h">Agenda</div>
     <div class="rules-text">
-      <b>Quadras:</b> 2 rápidas (10h–18h), 2 de saibro (10h–18h) e 1 saibro coberta (12h–18h).<br>
-      <b>10h00–14h30</b> — classificatória (33 jogos, sets até 4 games, 30 min). <b>Taça Nadal</b> às <b>12h–14h</b> na quadra coberta (jogo especial de 2h, sem peso na classificação).<br>
-      <b>14h30–15h00</b> — pausa. <b>15h00–18h00</b> — mata-mata Ouro e Prata (1 set, 45 min). Ninguém joga dois jogos seguidos na classificatória.
+      <b>10h00–12h30</b> — fase de grupos (5 quadras, 5 ondas). <b>12h30–13h00</b> — pausa e apuração.<br>
+      <b>13h00–16h00</b> — mata-mata. Quartas Ouro + repescagem Consolação (13h00), quartas Prata (13h45), semifinais das três chaves (14h30), finais (15h15).
     </div>`;
 }
 
-/* ============================================================ SORTEIO / DRAFT */
+/* ====================== SORTEIO ====================== */
 let draftPlan=null, draftIdx=0, draftAnimating=false;
 function renderSorteio(){
-  const potesHtml=POTES.map(p=>{
-    const sz=POTE_SIZE[p];
+  const potesHtml=[1,2,3].map(p=>{
     const filled=S.potes[p].filter(x=>x&&x.trim()).length;
-    const inputs=S.potes[p].map((nm,i)=>`<input class="inp ${S.drawDone?'done':''}" ${S.drawDone||S.potesLocked?'disabled':''} placeholder="Atleta ${i+1}" value="${(nm||'').replace(/"/g,'&quot;')}" onchange="setPote(${p},${i},this.value)">`).join("");
-    return `<div class="pote"><div class="pote-h"><span class="n">${p}</span><span class="t">Pote ${p}</span><span class="pos">${filled}/${sz}</span></div>${inputs}</div>`;
+    const inputs=S.potes[p].map((nm,i)=>`<input class="inp ${S.drawDone?'done':''}" ${S.drawDone?'disabled':''} placeholder="Atleta ${i+1}" value="${(nm||'').replace(/"/g,'&quot;')}" onchange="setPote(${p},${i},this.value)">`).join("");
+    return `<div class="pote"><div class="pote-h"><span class="n">${p}</span><span class="t">Pote ${p}</span><span class="pos">→ posição ${p} · ${filled}/7</span></div>${inputs}</div>`;
   }).join("");
-  const total=POTES.reduce((a,p)=>a+S.potes[p].filter(x=>x&&x.trim()).length,0);
-  const ready = POTES.every(p=>S.potes[p].filter(x=>x&&x.trim()).length===POTE_SIZE[p]);
+  const total=[1,2,3].reduce((a,p)=>a+S.potes[p].filter(x=>x&&x.trim()).length,0);
+  const ready=[1,2,3].every(p=>S.potes[p].filter(x=>x&&x.trim()).length===7);
 
-  const stage = `<div class="stage" id="stage">
-      <div class="eyebrow">${S.drawDone?'Sorteio concluído':'Sorteio das vagas'}</div>
-      <div class="reveal-name" id="revealName">${S.drawDone?'🎾 Chaves definidas':'Pronto para sortear'}</div>
-      <div class="reveal-dest ${S.drawDone?'show':''}" id="revealDest">${S.drawDone?'Letras atribuídas dentro de cada pote':''}</div>
-      <div class="progress" id="revealProg">${S.drawDone?'22/22 sorteados':(total+'/22 atletas cadastrados')}</div>
+  const stage=`<div class="stage" id="stage">
+      <div class="eyebrow">${S.drawDone?'Sorteio concluído':'Sorteio dos grupos'}</div>
+      <div class="reveal-name" id="revealName">${S.drawDone?'🎾 Grupos definidos':'Pronto para sortear'}</div>
+      <div class="reveal-dest ${S.drawDone?'show':''}" id="revealDest">${S.drawDone?'Um atleta de cada pote por grupo':''}</div>
+      <div class="progress" id="revealProg">${total}/21 atletas cadastrados</div>
     </div>`;
-
-  const mini=`<div class="mini-groups">`+POTES.map(p=>{
-    const sz=POTE_SIZE[p];
-    const slots=[];
-    for(let i=0;i<sz;i++){
-      const nm=S.drawDone? (S.letters[p]&&S.letters[p][i]) : null;
-      slots.push(`<div class="slot" data-p="${p}" data-i="${i}"><span class="pote-badge">${LETTERS[i]}</span><span class="pl ${nm?'':'tbd'}">${nm||('· P'+p+'-'+LETTERS[i])}</span></div>`);
-    }
-    return `<div class="mini-g"><div class="mh"><span class="gtag">${p}</span><b>Pote ${p}</b></div>${slots.join("")}</div>`;
+  const mini=`<div class="mini-groups">`+GROUPS.map(g=>{
+    const slots=[1,2,3].map(pos=>{ const nm=S.groups[g][pos-1];
+      return `<div class="slot" data-g="${g}" data-pos="${pos}"><span class="pote-badge">P${pos}</span><span class="pl ${nm?'':'tbd'}">${nm||('· '+g+pos)}</span></div>`; }).join("");
+    return `<div class="mini-g"><div class="mh"><span class="gtag">${g}</span><b>Grupo ${g}</b></div>${slots}</div>`;
   }).join("")+`</div>`;
 
   const bar = S.drawDone
-    ? (S.potesLocked
-        ? `<div class="draft-bar"><span class="lockchip">🔒 Sorteio travado</span>
+    ? (S.groupsLocked
+        ? `<div class="draft-bar"><span class="lockchip">🔒 Grupos travados</span>
             <button class="btn ghost" onclick="toggleLock()">🔓 Destravar</button>
-            <span style="font-size:12.5px;color:var(--ink-3)">Sorteio protegido — refazer, limpar e zerar tudo estão bloqueados.</span></div>`
-        : `<div class="draft-bar"><button class="btn primary" onclick="toggleLock()">🔒 Travar sorteio</button>
+            <span style="font-size:12.5px;color:var(--ink-3)">Sorteio protegido.</span></div>`
+        : `<div class="draft-bar"><button class="btn primary" onclick="toggleLock()">🔒 Travar grupos</button>
             <button class="btn ghost" onclick="redoDraw()">↺ Refazer sorteio</button>
             <button class="btn ghost" style="color:var(--wine)" onclick="resetSorteio()">🗑 Limpar tudo</button>
-            <span style="font-size:12.5px;color:var(--ink-3)">Trave o sorteio após definido para não perdê-lo.</span></div>`)
+            <span style="font-size:12.5px;color:var(--ink-3)">Trave os grupos após o sorteio definitivo.</span></div>`)
     : `<div class="draft-bar">
         <button class="btn primary" id="btnNext" ${ready?'':'disabled'} onclick="draftNext()">🎲 Sortear próximo</button>
         <button class="btn" id="btnAuto" ${ready?'':'disabled'} onclick="draftAll()">⏩ Sortear tudo</button>
         <button class="btn ghost" onclick="loadRoster()">Carregar inscritos</button>
         <button class="btn ghost" style="color:var(--wine)" onclick="resetSorteio()">🗑 Limpar nomes</button>
-        ${ready?'':'<span style="font-size:12.5px;color:var(--ink-3)">Preencha todos os potes (6/6/5/5) para liberar o sorteio.</span>'}
+        ${ready?'':'<span style="font-size:12.5px;color:var(--ink-3)">Preencha 7 nomes em cada pote para liberar o sorteio.</span>'}
       </div>`;
 
-  return `<div class="page-head"><div><h1>Sorteio</h1><p>Os nomes de cada pote são fixos; o sorteio define <b>qual vaga (A, B, C…)</b> cada atleta ocupa dentro do seu pote. Isso resolve todos os 33 confrontos da classificatória.</p></div>
-    <div class="stamp">4 potes · 6/6/5/5</div></div>
-    ${bar}${stage}
-    <div class="rsec-h">Potes &amp; vagas</div>${mini}
-    ${ S.drawDone?'' : '<div class="rsec-h">Editar nomes dos potes</div><div class="potes-grid">'+potesHtml+'</div>'}`;
+  return `<div class="page-head"><div><h1>Sorteio</h1><p>Sorteia-se o pote 1 nos grupos A–G, depois o pote 2, depois o pote 3. Cada grupo recebe 1 atleta de cada pote (posição = pote).</p></div>
+    <div class="stamp">3 potes × 7 · 1 por pote por grupo</div></div>
+    ${bar}${stage}<div class="rsec-h">Grupos</div>${mini}
+    ${ S.drawDone?'' : '<div class="rsec-h">Potes</div><div class="potes-grid">'+potesHtml+'</div>'}`;
 }
-function setPote(p,i,v){ if(S.potesLocked||S.drawDone) return; S.potes[p][i]=v.trim(); saveConfig(); render(); }
+function setPote(p,i,v){ if(S.groupsLocked) return; S.potes[p][i]=v.trim(); saveConfig(); render(); }
 function loadRoster(){ S.potes=JSON.parse(JSON.stringify(ROSTER)); saveConfig(); render(); toast("Inscritos carregados nos potes."); }
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function buildPlan(){
-  const plan=[];
-  POTES.forEach(p=>{
-    const names=shuffle(S.potes[p].slice(0,POTE_SIZE[p]));
-    names.forEach((nm,i)=> plan.push({pote:p, li:i, name:nm}));
-  });
-  return plan;
-}
-function ensurePlan(){ if(!draftPlan){ draftPlan=buildPlan(); draftIdx=0; POTES.forEach(p=> S.letters[p]=[]); } }
+function buildPlan(){ const plan=[]; for(let p=1;p<=3;p++){ const names=shuffle(S.potes[p].slice()); GROUPS.forEach((g,idx)=> plan.push({pote:p,name:names[idx],group:g})); } return plan; }
+function ensurePlan(){ if(!draftPlan){ draftPlan=buildPlan(); draftIdx=0; } }
 function commitReveal(item){
-  if(!S.letters[item.pote]) S.letters[item.pote]=[];
-  S.letters[item.pote][item.li]=item.name;
+  S.groups[item.group][item.pote-1]=item.name;
   const stage=$("#stage"); if(stage) stage.classList.add("pop");
   saveConfig();
-  const slot=document.querySelector(`.mini-g .slot[data-p="${item.pote}"][data-i="${item.li}"]`);
+  const slot=document.querySelector(`.mini-g .slot[data-g="${item.group}"][data-pos="${item.pote}"]`);
   if(slot){ slot.classList.add("just"); const pl=slot.querySelector(".pl"); pl.textContent=item.name; pl.classList.remove("tbd"); }
 }
 function draftNext(cb){
-  if(S.potesLocked || draftAnimating) return;
+  if(S.groupsLocked||draftAnimating) return;
   ensurePlan();
   if(draftIdx>=draftPlan.length){ finishDraw(); if(cb)cb(); return; }
   const item=draftPlan[draftIdx];
@@ -869,149 +872,106 @@ function draftNext(cb){
   const pool=draftPlan.filter(x=>x.pote===item.pote).map(x=>x.name);
   let ticks=0; const maxT=16;
   const spin=setInterval(()=>{
-    nameEl.textContent = pool[Math.floor(Math.random()*pool.length)];
-    ticks++;
+    nameEl.textContent=pool[Math.floor(Math.random()*pool.length)]; ticks++;
     if(ticks>=maxT){
-      clearInterval(spin);
-      nameEl.classList.remove("cycling");
-      nameEl.textContent=item.name;
-      destEl.innerHTML=`Pote ${item.pote} · Vaga <span class="gtag2">${LETTERS[item.li]}</span>`;
-      destEl.classList.add("show");
-      commitReveal(item);
-      draftIdx++;
-      progEl.textContent = `${draftIdx}/22 sorteados`;
-      setTimeout(()=>{
-        draftAnimating=false;
-        if(btnN)btnN.disabled=false; if(btnA)btnA.disabled=false;
-        if(draftIdx>=draftPlan.length) finishDraw();
-        if(cb) cb();
-      }, 420);
+      clearInterval(spin); nameEl.classList.remove("cycling"); nameEl.textContent=item.name;
+      destEl.innerHTML=`<b>Pote ${item.pote}</b> · Grupo <span class="gtag2">${item.group}</span>`;
+      destEl.classList.add("show"); commitReveal(item); draftIdx++;
+      progEl.textContent=`${draftIdx}/21 sorteados`;
+      setTimeout(()=>{ draftAnimating=false; if(btnN)btnN.disabled=false; if(btnA)btnA.disabled=false;
+        if(draftIdx>=draftPlan.length) finishDraw(); if(cb)cb(); }, 420);
     }
   }, 55);
 }
-function draftAll(){
-  if(S.potesLocked) return;
-  ensurePlan();
-  while(draftIdx<draftPlan.length){ const it=draftPlan[draftIdx]; if(!S.letters[it.pote])S.letters[it.pote]=[]; S.letters[it.pote][it.li]=it.name; draftIdx++; }
-  finishDraw();
-}
+function draftAll(){ if(S.groupsLocked) return; ensurePlan(); while(draftIdx<draftPlan.length){ const it=draftPlan[draftIdx]; S.groups[it.group][it.pote-1]=it.name; draftIdx++; } finishDraw(); }
 function finishDraw(){
   if(S.drawDone) return;
   S.drawDone=true; saveConfig();
   const nameEl=$("#revealName"), destEl=$("#revealDest");
-  if(nameEl) nameEl.textContent="🏆 Chaves definidas!";
+  if(nameEl) nameEl.textContent="🏆 Grupos definidos!";
   if(destEl){ destEl.innerHTML="Boa sorte a todos"; destEl.classList.add("show"); }
   confetti();
-  setTimeout(()=>{ toast("Sorteio concluído! Confrontos aplicados em todo o torneio."); render(); }, 1200);
+  setTimeout(()=>{ toast("Sorteio concluído! Nomes aplicados em todo o torneio."); render(); }, 1200);
 }
 function toggleLock(){
-  if(S.potesLocked){ if(!askCode()) return; S.potesLocked=false; saveConfig(); render(); toast("Sorteio destravado."); }
-  else { S.potesLocked=true; saveConfig(); render(); toast("Sorteio travado 🔒"); }
+  if(S.groupsLocked){ if(!askCode()) return; S.groupsLocked=false; saveConfig(); render(); toast("Grupos destravados."); }
+  else { S.groupsLocked=true; saveConfig(); render(); toast("Grupos travados 🔒"); }
 }
 function resetScores(){
   if(!askCode()) return;
-  if(!confirm("Zerar APENAS os placares (classificatória, finais e Taça Nadal)? O sorteio e os nomes são mantidos.")) return;
-  S.results={}; S.finals={}; S.tiebreaks={}; S.nadal.ra=null; S.nadal.rb=null;
-  saveEverything(); render(); toast("Placares zerados. Sorteio mantido.");
+  if(!confirm("Zerar APENAS os placares (grupos e finais)? Grupos, potes e nomes são mantidos.")) return;
+  S.results={}; S.finals={}; S.tiebreaks={}; saveEverything(); render(); toast("Placares zerados.");
 }
 function resetSorteio(){
-  if(S.potesLocked){ toast("Sorteio travado — destrave primeiro."); return; }
+  if(S.groupsLocked){ toast("Grupos travados — destrave primeiro."); return; }
   if(!askCode()) return;
-  if(!confirm("Limpar o sorteio? Apaga as vagas sorteadas (os nomes dos potes são mantidos). Placares mantidos.")) return;
-  POTES.forEach(p=> S.letters[p]=[]);
-  S.drawDone=false; draftPlan=null; draftIdx=0;
-  saveConfig(); render(); toast("Sorteio limpo.");
+  if(!confirm("Limpar o sorteio? Apaga nomes dos potes e alocação dos grupos. (Placares são mantidos — para zerar tudo use o menu.)")) return;
+  for(let p=1;p<=3;p++) S.potes[p]=["","","","","","",""];
+  GROUPS.forEach(g=> S.groups[g]=[null,null,null]);
+  S.drawDone=false; draftPlan=null; draftIdx=0; saveConfig(); render(); toast("Sorteio limpo.");
 }
 function redoDraw(){
-  if(S.potesLocked){ toast("Sorteio travado — destrave primeiro."); return; }
+  if(S.groupsLocked){ toast("Grupos travados — destrave primeiro."); return; }
   if(!askCode()) return;
-  if(!confirm("Refazer o sorteio? Isso re-sorteia as vagas dentro dos potes (nomes mantidos).")) return;
-  POTES.forEach(p=> S.letters[p]=[]);
+  if(!confirm("Refazer o sorteio? Limpa a alocação atual (nomes dos potes são mantidos).")) return;
+  GROUPS.forEach(g=> S.groups[g]=[null,null,null]);
   S.drawDone=false; draftPlan=null; draftIdx=0; saveConfig(); render();
 }
 function confetti(){
   const c=$("#confetti"); c.innerHTML=""; c.classList.add("go");
   const cols=["#123FD6","#00AEEF","#6DBE45","#C8871A","#D7F171","#2FA98E"];
-  for(let i=0;i<90;i++){
-    const d=document.createElement("div"); d.className="conf";
+  for(let i=0;i<90;i++){ const d=document.createElement("div"); d.className="conf";
     d.style.left=Math.random()*100+"%"; d.style.background=cols[i%cols.length];
-    d.style.animationDuration=(1.6+Math.random()*1.6)+"s"; d.style.animationDelay=(Math.random()*.5)+"s";
-    c.appendChild(d);
-  }
+    d.style.animationDuration=(1.6+Math.random()*1.6)+"s"; d.style.animationDelay=(Math.random()*.5)+"s"; c.appendChild(d); }
   setTimeout(()=>{ c.classList.remove("go"); c.innerHTML=""; }, 3600);
 }
 
-/* ============================================================ SETTERS DE PLACAR */
+/* ====================== PLACAR / TIE-BREAK ====================== */
 function setScore(kind,id,side,val){
   const v=val.trim()===""?null:Math.max(0,Math.min(20,parseInt(val,10)||0));
   if(kind==="group"){ if(!S.results[id]) S.results[id]={a:null,b:null}; S.results[id][side]=v; saveResult(id); }
   else if(kind==="final"){ if(!S.finals[id]) S.finals[id]={a:null,b:null}; S.finals[id][side]=v; saveFinal(id); }
-  else if(kind==="nadal"){ S.nadal[side]=v; saveConfig(); }
   render();
 }
-function setNadal(side,val){ S.nadal[side]=val.trim(); saveConfig(); }
-
-/* ============================================================ TIE-BREAK MANUAL */
-function tiePanel(title, key, members){
+function tiePanel(title,key,members){
   const order=(S.tiebreaks&&S.tiebreaks[key])||[];
-  const resolved = members.length && members.every(m=> order.includes(m.id));
-  const chips=members.map(m=>{
-    const pos=order.indexOf(m.id);
-    return `<button class="tiechip ${pos>=0?'set':''}" onclick="pickTie('${key}','${m.id}')">${pos>=0?`<span class="tiepos">${pos+1}º</span>`:''}${m.label}</button>`;
-  }).join("");
+  const resolved=members.length && members.every(m=> order.includes(m.id));
+  const chips=members.map(m=>{ const pos=order.indexOf(m.id);
+    return `<button class="tiechip ${pos>=0?'set':''}" onclick="pickTie('${key}','${m.id}')">${pos>=0?`<span class="tiepos">${pos+1}º</span>`:''}${m.label}</button>`; }).join("");
   return `<div class="tiebox ${resolved?'done':''}">
     <div class="tieh">⚖ Tie-break — ${title} ${resolved?'<span class="tiedone">✓ definido</span>':'<span style="color:var(--wine);font-weight:800">a definir</span>'}</div>
-    <div class="tiesub">${resolved
-      ? 'Ordem registrada. Para corrigir: clique num nome para desmarcá-lo e reordene, ou use <b>Limpar desempate</b>.'
-      : 'Empate total nos critérios. Jogue o tie-break e clique nos atletas na <b>ordem do resultado</b> (1º clique = melhor colocado).'}</div>
+    <div class="tiesub">${resolved?'Ordem registrada. Clique num nome para desmarcá-lo e reordenar, ou use Limpar desempate.':'Empate nos critérios. Jogue o tie-break e clique nos atletas na <b>ordem do resultado</b> (1º clique = melhor colocado).'}</div>
     <div class="tiechips">${chips}</div>
-    <button class="btn ghost" style="margin-top:9px;color:var(--wine);padding:6px 12px" onclick="clearTie('${key}')">Limpar desempate</button>
-  </div>`;
+    <button class="btn ghost" style="margin-top:9px;color:var(--wine);padding:6px 12px" onclick="clearTie('${key}')">Limpar desempate</button></div>`;
 }
 function pickTie(key,id){
-  const arr=(S.tiebreaks[key]||[]).slice();
-  const i=arr.indexOf(id);
+  const arr=(S.tiebreaks[key]||[]).slice(); const i=arr.indexOf(id);
   if(i>=0) arr.splice(i,1); else arr.push(id);
   if(arr.length) S.tiebreaks[key]=arr; else delete S.tiebreaks[key];
   saveConfig(); render();
 }
 function clearTie(key){ delete S.tiebreaks[key]; saveConfig(); render(); }
+function askCode(){ const c=prompt("Código do organizador para confirmar:"); if(c===null) return false; if(c.trim()!==ADMIN_CODE){ toast("Código incorreto."); return false; } return true; }
 
-/* ============================================================ CÓDIGO ORGANIZADOR */
-function askCode(){
-  const c=prompt("Código do organizador para confirmar:");
-  if(c===null) return false;
-  if(c.trim()!==ADMIN_CODE){ toast("Código incorreto."); return false; }
-  return true;
-}
-
-/* ============================================================ MENU / EXPORT / TEMA */
-function toggleTheme(){
-  const el=document.documentElement, cur=el.dataset.theme;
+/* ====================== MENU / EXPORT / TEMA ====================== */
+function toggleTheme(){ const el=document.documentElement, cur=el.dataset.theme;
   if(cur==="dark"){ delete el.dataset.theme; try{localStorage.setItem("tt_theme","light")}catch(e){} }
-  else { el.dataset.theme="dark"; try{localStorage.setItem("tt_theme","dark")}catch(e){} }
-}
-function toggleMenu(e){ e.stopPropagation(); const m=$("#menu"); m.style.display = m.style.display==="none"?"block":"none"; }
+  else { el.dataset.theme="dark"; try{localStorage.setItem("tt_theme","dark")}catch(e){} } }
+function toggleMenu(e){ e.stopPropagation(); const m=$("#menu"); m.style.display=m.style.display==="none"?"block":"none"; }
 document.addEventListener("click",()=>{ const m=$("#menu"); if(m) m.style.display="none"; });
-function doExport(){
-  const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  a.download="vinci-compass-open.json"; a.click(); toast("Estado exportado.");
-}
-function doImport(ev){
-  const f=ev.target.files[0]; if(!f) return;
-  const r=new FileReader(); r.onload=()=>{ try{ S=Object.assign(defaultState(), JSON.parse(r.result)); saveEverything(); render(); toast("Estado importado."); }catch(e){ toast("Arquivo inválido."); } };
-  r.readAsText(f); ev.target.value="";
-}
+function doExport(){ const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="vinci-open.json"; a.click(); toast("Estado exportado."); }
+function doImport(ev){ const f=ev.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{ try{ S=Object.assign(defaultState(), JSON.parse(r.result)); saveEverything(); render(); toast("Estado importado."); }catch(e){ toast("Arquivo inválido."); } };
+  r.readAsText(f); ev.target.value=""; }
 function doReset(){
-  if(S.potesLocked){ toast("Sorteio travado — destrave para zerar tudo."); return; }
+  if(S.groupsLocked){ toast("Grupos travados — destrave para zerar tudo."); return; }
   if(!askCode()) return;
-  if(!confirm("Zerar TUDO (potes, sorteio e placares)? Não dá para desfazer.")) return;
-  S=defaultState(); draftPlan=null; draftIdx=0; saveEverything(); render(); toast("Torneio zerado.");
-}
+  if(!confirm("Zerar TUDO (potes, grupos e placares)? Não dá para desfazer.")) return;
+  S=defaultState(); draftPlan=null; draftIdx=0; saveEverything(); render(); toast("Torneio zerado."); }
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2400); }
 
-/* ============================================================ INIT */
+/* ====================== INIT ====================== */
 initData();
 </script>
 </body>
