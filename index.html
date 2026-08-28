@@ -284,6 +284,7 @@ input,select{font-family:inherit}
 <div id="menu" style="display:none; position:fixed; top:60px; right:16px; z-index:60; background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:6px; min-width:190px">
   <button class="btn ghost" style="width:100%; text-align:left; border:0; margin-bottom:2px" onclick="doExport()">⬇ Exportar (JSON)</button>
   <button class="btn ghost" style="width:100%; text-align:left; border:0; margin-bottom:2px" onclick="document.getElementById('importfile').click()">⬆ Importar (JSON)</button>
+  <button class="btn ghost" style="width:100%; text-align:left; border:0; margin-bottom:2px" onclick="doResync()">☁️ Republicar dados (sincronizar)</button>
   <button class="btn ghost" style="width:100%; text-align:left; border:0; margin-bottom:2px" onclick="resetScores()">🧹 Zerar apenas placares</button>
   <button class="btn ghost" style="width:100%; text-align:left; border:0; color:var(--wine)" onclick="doReset()">↺ Zerar tudo</button>
   <input type="file" id="importfile" accept="application/json" style="display:none" onchange="doImport(event)">
@@ -380,10 +381,23 @@ const ROSTER = {
   3:["Gustavo Xavier","Philip Medley","Eike Rabelo","Gustavo Castro","Luis Guedes","Pedro Albuquerque","Victor Hugo Borges"]
 };
 
+/* Sorteio OFICIAL já realizado e anunciado (P1, P2, P3 por grupo). É o padrão fixo do app. */
+const FIXED_GROUPS = {
+  A:["Ilan Nigri","Plinio Barbosa","Victor Hugo Borges"],
+  B:["Andre Nogueira","Tiago Timm","Gustavo Castro"],
+  C:["Daniel Doine","Pedro Lopes","Philip Medley"],
+  D:["Mateus Maia","Carlos Eduardo Martins","Luis Guedes"],
+  E:["Bruno Zaremba","Leonardo Antunes","Eike Rabelo"],
+  F:["Matheus Canale","Felipe Hallot","Pedro Albuquerque"],
+  G:["Thomaz Hadba","Gabriel Felzenszwalb","Gustavo Xavier"]
+};
+function cloneGroups(src){ const o={}; GROUPS.forEach(g=> o[g]=(src[g]||[null,null,null]).slice()); return o; }
+function groupsComplete(gr){ try{ return GROUPS.every(g=> gr && gr[g] && gr[g].length===3 && gr[g].every(x=> x && String(x).trim())); }catch(e){ return false; } }
+function normalizeGroups(){ if(!groupsComplete(S.groups)){ S.groups=cloneGroups(FIXED_GROUPS); S.drawDone=true; return true; } return false; }
+
 function defaultState(){
   const potes={1:ROSTER[1].slice(),2:ROSTER[2].slice(),3:ROSTER[3].slice()};
-  const groups={}; GROUPS.forEach(g=> groups[g]=[null,null,null]);
-  return { potes, groups, drawDone:false, groupsLocked:false, results:{}, finals:{}, tiebreaks:{}, nadal:{pa:"",pb:"",a:null,b:null} };
+  return { potes, groups:cloneGroups(FIXED_GROUPS), drawDone:true, groupsLocked:true, results:{}, finals:{}, tiebreaks:{}, nadal:{pa:"",pb:"",a:null,b:null} };
 }
 let S = defaultState();
 let VIEW = "classificacao";
@@ -403,33 +417,40 @@ function normalizePotes(){
 
 /* ====================== PERSISTÊNCIA ====================== */
 let DBH=null, LIVE=false;
+let SYNC={ok:false, err:null};
+function syncErr(e){ SYNC.err=(e&&(e.code||e.message))||"erro"; try{render();}catch(_){} }
+function syncOk(){ if(SYNC.err||!SYNC.ok){ SYNC.ok=true; SYNC.err=null; try{render();}catch(_){} } }
 function persistLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify(S)); }catch(e){} }
 function allGroupIds(){ const ids=[]; GROUPS.forEach(g=> groupPairs().forEach(([i,j])=> ids.push(mid(g,i,j)))); return ids; }
-function saveResult(id){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_RES).doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}); } }
-function saveFinal(slot){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_FIN).doc(slot).set(S.finals[slot]||{a:null,b:null}).catch(()=>{}); } }
-function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_CFG).doc(D_CFG).set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, groupsLocked:S.groupsLocked, tiebreaks:S.tiebreaks, nadal:S.nadal||{}}).catch(()=>{}); } }
+function saveResult(id){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_RES).doc(id).set(S.results[id]||{a:null,b:null}).then(syncOk).catch(syncErr); } }
+function saveFinal(slot){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_FIN).doc(slot).set(S.finals[slot]||{a:null,b:null}).then(syncOk).catch(syncErr); } }
+function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_CFG).doc(D_CFG).set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, groupsLocked:S.groupsLocked, tiebreaks:S.tiebreaks, nadal:S.nadal||{}}).then(syncOk).catch(syncErr); } }
 function saveEverything(){
   persistLocal();
   if(LIVE&&DBH){
     saveConfig();
-    allGroupIds().forEach(id=> DBH.collection(C_RES).doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}));
-    Object.keys(BRACKET).forEach(s=> DBH.collection(C_FIN).doc(s).set(S.finals[s]||{a:null,b:null}).catch(()=>{}));
+    allGroupIds().forEach(id=> DBH.collection(C_RES).doc(id).set(S.results[id]||{a:null,b:null}).then(syncOk).catch(syncErr));
+    Object.keys(BRACKET).forEach(s=> DBH.collection(C_FIN).doc(s).set(S.finals[s]||{a:null,b:null}).then(syncOk).catch(syncErr));
   }
 }
 function initData(){
   try{ const raw=localStorage.getItem(LKEY); if(raw) S=Object.assign(defaultState(), JSON.parse(raw)); }catch(e){}
   if(normalizePotes()) persistLocal();
+  if(normalizeGroups()) persistLocal();
   if(!DEMO && typeof firebase!=="undefined" && firebase.initializeApp){
     try{
       firebase.initializeApp(firebaseConfig);
       DBH=firebase.firestore(); LIVE=true;
       DBH.collection(C_CFG).doc(D_CFG).onSnapshot(d=>{
-        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; S.groupsLocked=!!c.groupsLocked; S.tiebreaks=c.tiebreaks||{}; if(c.nadal)S.nadal=c.nadal; }
-        if(normalizePotes()) saveConfig();
+        syncOk();
+        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups && groupsComplete(c.groups)) S.groups=c.groups; S.groupsLocked=!!c.groupsLocked; S.tiebreaks=c.tiebreaks||{}; if(c.nadal)S.nadal=c.nadal; }
+        let changed=normalizePotes(); if(normalizeGroups()) changed=true;
+        S.drawDone=groupsComplete(S.groups);
+        if(changed) saveConfig();
         render();
-      }, ()=>{});
-      DBH.collection(C_RES).onSnapshot(s=>{ s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, ()=>{});
-      DBH.collection(C_FIN).onSnapshot(s=>{ s.forEach(doc=> S.finals[doc.id]=doc.data()); render(); }, ()=>{});
+      }, syncErr);
+      DBH.collection(C_RES).onSnapshot(s=>{ syncOk(); s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, syncErr);
+      DBH.collection(C_FIN).onSnapshot(s=>{ syncOk(); s.forEach(doc=> S.finals[doc.id]=doc.data()); render(); }, syncErr);
     }catch(e){ LIVE=false; }
   }
   render();
@@ -596,11 +617,16 @@ function render(){
   else if(VIEW==="jogos") app.innerHTML=renderJogos();
   else if(VIEW==="chaves") app.innerHTML=renderChaves();
   else if(VIEW==="regras") app.innerHTML=renderRegras();
-  const mc=$("#modechip"); const online=LIVE&&!DEMO;
+  const mc=$("#modechip");
+  const online = LIVE && !DEMO && SYNC.ok && !SYNC.err;
+  const errored = LIVE && !DEMO && SYNC.err;
   mc.className="modechip"+(online?"":" demo");
-  mc.querySelector(".lbl").textContent = DEMO? "modo demo" : (LIVE? "ao vivo" : "offline");
-  $("#foot").innerHTML = (online ? "Placar ao vivo via Firebase/Firestore (projeto vinci-open)."
-    : (DEMO? "Modo demonstração — dados só neste navegador." : "Sem conexão com o Firebase agora — usando dados locais deste navegador."))
+  mc.querySelector(".lbl").textContent = DEMO? "modo demo" : errored? "sync bloqueado" : online? "ao vivo" : LIVE? "conectando…" : "offline";
+  const errHint = errored
+    ? ("⚠️ O Firebase conectou mas está <b>recusando ler/gravar</b> (" + SYNC.err + "). Os dados ficam só neste navegador e não sincronizam. Ajuste as <b>regras do Firestore</b> para permitir acesso (veja instruções).")
+    : "";
+  $("#foot").innerHTML = (errHint || (online ? "Placar ao vivo via Firebase/Firestore (projeto vinci-open)."
+    : (DEMO? "Modo demonstração — dados só neste navegador." : LIVE? "Conectando ao Firebase…" : "Sem conexão com o Firebase agora — usando dados locais deste navegador.")))
     + " · 21 jogadores · 3 potes · 7 grupos de 3 · Ouro 8 · Prata 8 · Consolação 5.";
 }
 
@@ -1018,6 +1044,13 @@ function doReset(){
   if(!askCode()) return;
   if(!confirm("Zerar TUDO (potes, grupos e placares)? Não dá para desfazer.")) return;
   S=defaultState(); draftPlan=null; draftIdx=0; saveEverything(); render(); toast("Torneio zerado."); }
+function doResync(){
+  if(DEMO){ toast("Modo demo — sem Firebase."); return; }
+  if(!LIVE||!DBH){ toast("Firebase não conectou neste navegador."); return; }
+  if(!askCode()) return;
+  SYNC.err=null; saveEverything();
+  setTimeout(()=>{ toast(SYNC.err? ("Falha ao publicar: "+SYNC.err) : "Dados republicados no Firebase."); render(); }, 900);
+}
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2400); }
 
 /* ====================== INIT ====================== */
