@@ -19,7 +19,7 @@
   --navy:#0522A6; --blue:#123FD6; --blue-2:#1560E0; --cyan:#00AEEF;
   --teal:#2FA98E; --green:#6DBE45; --wine:#8E3A63;
   --gold:#C8871A; --gold-soft:#F5E9CF; --silver:#8390B4; --silver-soft:#E9ECF5;
-  --bronze:#A56A3A; --bronze-soft:#EFE0D2;
+  --bronze:#A56A3A; --bronze-soft:#EFE0D2; --clay:#E0752B;
   --up:#2FA98E; --down:#8E3A63; --flat:#8C97B8; --live:#D2544E;
   --bg:#F5F7FB; --panel:#FFFFFF; --panel-2:#FBFCFE;
   --ink:#12204A; --ink-2:#4A567C; --ink-3:#8390B4;
@@ -33,7 +33,7 @@ html[data-theme="dark"]{
   --ink:#EAEEFB; --ink-2:#A9B4DA; --ink-3:#6E7AA6;
   --line:#1E2853; --line-2:#182146; --brand-soft:#7FB0F2;
   --gold:#E0A526; --gold-soft:#33291020; --silver:#A9B4DA; --silver-soft:#1A2246;
-  --bronze:#C98A5A; --bronze-soft:#241a12;
+  --bronze:#C98A5A; --bronze-soft:#241a12; --clay:#E0752B;
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
@@ -131,10 +131,13 @@ input,select{font-family:inherit}
 .match.empty{opacity:.5; box-shadow:none; border-style:dashed}
 .m-top{display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:11px; color:var(--ink-3); font-weight:700}
 .court{background:var(--panel-2); border:1px solid var(--line); border-radius:6px; padding:2px 7px; letter-spacing:.02em}
+.cdot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:middle}
 .m-tier{margin-left:auto; font-weight:800; letter-spacing:.03em}
 .m-tier.ouro{color:var(--gold)} .m-tier.prata{color:var(--silver)} .m-tier.consol{color:var(--bronze)} .m-tier.grupo{color:var(--ink-3)}
 .m-row{display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px; padding:5px 0}
 .m-row .pl{font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.nadal-inp{font-size:14px; font-weight:700; border:0; border-bottom:1px dashed var(--gold); background:transparent; color:var(--ink); padding:3px 2px; width:100%}
+.nadal-inp:focus{outline:0; border-bottom-color:var(--blue)}
 .m-row .pl.tbd{color:var(--ink-3); font-style:italic; font-weight:600}
 .m-row.win .pl{color:var(--green); font-weight:800}
 .scorebox{width:46px; height:38px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink);
@@ -311,19 +314,32 @@ const C_RES="resultados_v2", C_FIN="finais_v2", C_CFG="config_v2", D_CFG="tornei
 /* ====================== ESTRUTURA ====================== */
 const GROUPS = ["A","B","C","D","E","F","G"];   // 7 grupos de 3
 
+/* Quadras: Saibro 1, Saibro 2, Rápida 1, Rápida 2 o dia todo; Saibro Coberta entra às 12h.
+   Só há 3 quadras de saibro, então das 4 QFs do Ouro, 3 ficam no saibro e 1 na rápida. */
+function courtDot(name){ const rap=/r[áa]pida/i.test(name||""); return `<span class="cdot" style="background:${rap?'var(--blue)':'var(--clay)'}"></span>`; }
+
+/* Grade de grupos (10:00–13:00): a Saibro 1 fica reservada para a Taça Nadal a partir das 12h */
 const GROUP_SCHEDULE = [
-  {time:"10:00", courts:[{g:"A",i:1,j:2},{g:"B",i:1,j:2},{g:"C",i:1,j:2},{g:"D",i:1,j:2},{g:"E",i:1,j:2}]},
-  {time:"10:30", courts:[{g:"A",i:1,j:3},{g:"B",i:1,j:3},{g:"C",i:1,j:3},{g:"D",i:1,j:3},{g:"E",i:1,j:3}]},
-  {time:"11:00", courts:[{g:"F",i:1,j:2},{g:"G",i:1,j:2},{g:"A",i:2,j:3},{g:"B",i:2,j:3},{g:"C",i:2,j:3}]},
-  {time:"11:30", courts:[{g:"F",i:1,j:3},{g:"G",i:1,j:3},{g:"D",i:2,j:3},{g:"E",i:2,j:3},null]},
-  {time:"12:00", courts:[{g:"F",i:2,j:3},{g:"G",i:2,j:3},null,null,null]}
+  {time:"10:00", cells:[{court:"Saibro 1",m:{g:"A",i:1,j:2}},{court:"Saibro 2",m:{g:"B",i:1,j:2}},{court:"Rápida 1",m:{g:"C",i:1,j:2}},{court:"Rápida 2",m:{g:"D",i:1,j:2}}]},
+  {time:"10:30", cells:[{court:"Saibro 1",m:{g:"A",i:1,j:3}},{court:"Saibro 2",m:{g:"B",i:1,j:3}},{court:"Rápida 1",m:{g:"C",i:1,j:3}},{court:"Rápida 2",m:{g:"D",i:1,j:3}}]},
+  {time:"11:00", cells:[{court:"Saibro 1",m:{g:"E",i:1,j:2}},{court:"Saibro 2",m:{g:"F",i:1,j:2}},{court:"Rápida 1",m:{g:"G",i:1,j:2}},{court:"Rápida 2",m:{g:"A",i:2,j:3}}]},
+  {time:"11:30", cells:[{court:"Saibro 1",m:{g:"E",i:1,j:3}},{court:"Saibro 2",m:{g:"F",i:1,j:3}},{court:"Rápida 1",m:{g:"G",i:1,j:3}},{court:"Rápida 2",m:{g:"B",i:2,j:3}}]},
+  {time:"12:00", cells:[{court:"Saibro 2",m:{g:"C",i:2,j:3}},{court:"Saibro Coberta",m:{g:"D",i:2,j:3}},{court:"Rápida 1",m:{g:"E",i:2,j:3}},{court:"Rápida 2",m:{g:"F",i:2,j:3}}]},
+  {time:"12:30", cells:[{court:"Saibro 2",m:{g:"G",i:2,j:3}},{court:"Saibro Coberta",m:null},{court:"Rápida 1",m:null},{court:"Rápida 2",m:null}]}
 ];
 
+/* Taça Rafael Nadal: exibição de ~2h dentro do bloco do meio-dia, na Saibro 1 */
+const NADAL = {time:"12:00–14:00", court:"Saibro 1"};
+
+/* Mata-mata (13:00–17:00): começa logo após a fase de grupos, sem pausa longa.
+   Das 13h às 14h a Saibro 1 ainda está com a Nadal, então a 1ª onda usa 4 quadras.
+   Ouro maximizado no saibro; Consolação em set convencional, só a repescagem (CPI) em 4 games. */
 const FINALS_SCHEDULE = [
-  {time:"13:00–13:45", courts:["OQF1","OQF2","OQF3","OQF4","CPI"]},
-  {time:"13:45–14:30", courts:["PQF1","PQF2","PQF3","PQF4","CSF2"]},
-  {time:"14:30–15:15", courts:["OSF1","OSF2","PSF1","PSF2","CSF1"]},
-  {time:"15:15–16:00", courts:["OF","PF","CF",null,null]}
+  {time:"13:00–14:00", cells:[{court:"Saibro 2",slot:"PQF1"},{court:"Saibro Coberta",slot:"PQF2"},{court:"Rápida 1",slot:"PQF3"},{court:"Rápida 2",slot:"PQF4"}]},
+  {time:"14:00–14:45", cells:[{court:"Saibro 1",slot:"OQF1"},{court:"Saibro 2",slot:"OQF2"},{court:"Saibro Coberta",slot:"OQF3"},{court:"Rápida 1",slot:"OQF4"},{court:"Rápida 2",slot:"CPI"}]},
+  {time:"14:45–15:30", cells:[{court:"Saibro 1",slot:"OSF1"},{court:"Saibro 2",slot:"OSF2"},{court:"Saibro Coberta",slot:"PSF1"},{court:"Rápida 1",slot:"PSF2"},{court:"Rápida 2",slot:"CSF1"}]},
+  {time:"15:30–16:15", cells:[{court:"Saibro 1",slot:null},{court:"Saibro 2",slot:null},{court:"Saibro Coberta",slot:null},{court:"Rápida 1",slot:"CSF2"},{court:"Rápida 2",slot:null}]},
+  {time:"16:15–17:00", cells:[{court:"Saibro 1",slot:"OF"},{court:"Saibro 2",slot:"PF"},{court:"Saibro Coberta",slot:"CF"},{court:"Rápida 1",slot:null},{court:"Rápida 2",slot:null}]}
 ];
 
 const BRACKET = {
@@ -367,11 +383,23 @@ const ROSTER = {
 function defaultState(){
   const potes={1:ROSTER[1].slice(),2:ROSTER[2].slice(),3:ROSTER[3].slice()};
   const groups={}; GROUPS.forEach(g=> groups[g]=[null,null,null]);
-  return { potes, groups, drawDone:false, groupsLocked:false, results:{}, finals:{}, tiebreaks:{} };
+  return { potes, groups, drawDone:false, groupsLocked:false, results:{}, finals:{}, tiebreaks:{}, nadal:{pa:"",pb:"",a:null,b:null} };
 }
 let S = defaultState();
 let VIEW = "classificacao";
 let PHASE = "grupos";
+
+/* Potes são fixos: se algum pote vier vazio (ex.: limpeza antiga), restaura do ROSTER */
+function normalizePotes(){
+  if(!S.potes) S.potes={};
+  let changed=false;
+  for(let p=1;p<=3;p++){
+    const arr=S.potes[p];
+    const filled=Array.isArray(arr)? arr.filter(x=>x&&String(x).trim()).length : 0;
+    if(filled===0){ S.potes[p]=ROSTER[p].slice(); changed=true; }
+  }
+  return changed;
+}
 
 /* ====================== PERSISTÊNCIA ====================== */
 let DBH=null, LIVE=false;
@@ -379,7 +407,7 @@ function persistLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify(S)); }ca
 function allGroupIds(){ const ids=[]; GROUPS.forEach(g=> groupPairs().forEach(([i,j])=> ids.push(mid(g,i,j)))); return ids; }
 function saveResult(id){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_RES).doc(id).set(S.results[id]||{a:null,b:null}).catch(()=>{}); } }
 function saveFinal(slot){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_FIN).doc(slot).set(S.finals[slot]||{a:null,b:null}).catch(()=>{}); } }
-function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_CFG).doc(D_CFG).set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, groupsLocked:S.groupsLocked, tiebreaks:S.tiebreaks}).catch(()=>{}); } }
+function saveConfig(){ persistLocal(); if(LIVE&&DBH){ DBH.collection(C_CFG).doc(D_CFG).set({potes:S.potes, groups:S.groups, drawDone:S.drawDone, groupsLocked:S.groupsLocked, tiebreaks:S.tiebreaks, nadal:S.nadal||{}}).catch(()=>{}); } }
 function saveEverything(){
   persistLocal();
   if(LIVE&&DBH){
@@ -390,12 +418,14 @@ function saveEverything(){
 }
 function initData(){
   try{ const raw=localStorage.getItem(LKEY); if(raw) S=Object.assign(defaultState(), JSON.parse(raw)); }catch(e){}
+  if(normalizePotes()) persistLocal();
   if(!DEMO && typeof firebase!=="undefined" && firebase.initializeApp){
     try{
       firebase.initializeApp(firebaseConfig);
       DBH=firebase.firestore(); LIVE=true;
       DBH.collection(C_CFG).doc(D_CFG).onSnapshot(d=>{
-        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; S.groupsLocked=!!c.groupsLocked; S.tiebreaks=c.tiebreaks||{}; }
+        if(d.exists){ const c=d.data(); if(c.potes)S.potes=c.potes; if(c.groups)S.groups=c.groups; S.drawDone=!!c.drawDone; S.groupsLocked=!!c.groupsLocked; S.tiebreaks=c.tiebreaks||{}; if(c.nadal)S.nadal=c.nadal; }
+        if(normalizePotes()) saveConfig();
         render();
       }, ()=>{});
       DBH.collection(C_RES).onSnapshot(s=>{ s.forEach(doc=> S.results[doc.id]=doc.data()); render(); }, ()=>{});
@@ -682,22 +712,22 @@ function renderClassificacao(){
 function scoreInput(kind,id,side,val){ const v=val==null?"":val;
   return `<input class="scorebox num" inputmode="numeric" maxlength="2" value="${v}" onchange="setScore('${kind}','${id}','${side}',this.value)" aria-label="games ${side}">`; }
 function groupMatchCard(entry,court){
-  if(!entry) return `<div class="match empty"><div class="m-top"><span class="court">Quadra ${court}</span><span class="m-tier grupo">livre</span></div><div class="m-vs">— sem jogo —</div></div>`;
+  if(!entry) return `<div class="match empty"><div class="m-top"><span class="court">${courtDot(court)}${court}</span><span class="m-tier grupo">livre</span></div><div class="m-vs">— sem jogo —</div></div>`;
   const {g,i,j}=entry, id=mid(g,i,j), r=S.results[id]||{};
   const a=r.a,b=r.b, aw=(a!=null&&b!=null&&a!==""&&b!==""&&+a>+b), bw=(a!=null&&b!=null&&a!==""&&b!==""&&+b>+a);
-  return `<div class="match"><div class="m-top"><span class="court">Quadra ${court}</span><span class="gtag" style="width:22px;height:22px;font-size:11px;border-radius:6px">${g}</span><span class="m-tier grupo">Grupo ${g}</span></div>
+  return `<div class="match"><div class="m-top"><span class="court">${courtDot(court)}${court}</span><span class="gtag" style="width:22px;height:22px;font-size:11px;border-radius:6px">${g}</span><span class="m-tier grupo">Grupo ${g}</span></div>
     <div class="m-row ${aw?'win':''}"><span class="pl ${isNamed(g,i)?'':'tbd'}">${name(g,i)}</span>${scoreInput('group',id,'a',a)}</div>
     <div class="m-vs">SET 4 GAMES</div>
     <div class="m-row ${bw?'win':''}"><span class="pl ${isNamed(g,j)?'':'tbd'}">${name(g,j)}</span>${scoreInput('group',id,'b',b)}</div></div>`;
 }
 function bracketMatchCardSchedule(slot,court){
-  if(!slot) return `<div class="match empty"><div class="m-top"><span class="court">Quadra ${court}</span></div><div class="m-vs">— sem jogo —</div></div>`;
+  if(!slot) return `<div class="match empty"><div class="m-top"><span class="court">${courtDot(court)}${court}</span></div><div class="m-vs">— sem jogo —</div></div>`;
   const b=BRACKET[slot], p=bracketPlayers(slot), r=S.finals[slot]||{};
   const na=pname(p.a), nb=pname(p.b);
   const a=r.a,bb=r.b, aw=(a!=null&&bb!=null&&a!==""&&bb!==""&&+a>+bb), bw=(a!=null&&bb!=null&&a!==""&&bb!==""&&+bb>+a);
   const tname=b.tier==='ouro'?'Ouro':b.tier==='prata'?'Prata':'Consolação';
-  const setlbl=b.tier==='consol'?'SET 4 GAMES':'SET CONVENCIONAL';
-  return `<div class="match"><div class="m-top"><span class="court">Quadra ${court}</span><span class="m-tier ${b.tier}">${tname}</span></div>
+  const setlbl=(slot==='CPI')?'SET 4 GAMES':'SET CONVENCIONAL';
+  return `<div class="match"><div class="m-top"><span class="court">${courtDot(court)}${court}</span><span class="m-tier ${b.tier}">${tname}</span></div>
     <div class="m-row ${aw?'win':''}"><span class="pl ${na?'':'tbd'}">${na||refLabel(b.a)}</span>${scoreInput('final',slot,'a',a)}</div>
     <div class="m-vs">${b.label.toUpperCase()} · ${setlbl}</div>
     <div class="m-row ${bw?'win':''}"><span class="pl ${nb?'':'tbd'}">${nb||refLabel(b.b)}</span>${scoreInput('final',slot,'b',bb)}</div></div>`;
@@ -708,22 +738,39 @@ function renderJogos(){
     <button class="phasetab ${PHASE==='finais'?'on':''}" onclick="setPhase('finais')">Fases finais</button></div>`;
   let body="";
   if(PHASE==="grupos"){
-    body=GROUP_SCHEDULE.map((rnd,idx)=>{
-      const cards=rnd.courts.map((c,ci)=> groupMatchCard(c,ci+1)).join("");
+    const note=`<div class="banner"><span>🎾 <b>Saibro 1, Saibro 2, Rápida 1 e Rápida 2</b> das 10h às 11h30; a <b>Saibro Coberta</b> entra às 12h. A <b>Saibro 1</b> fica com a Taça Nadal a partir das 12h. <span class="cdot" style="background:var(--clay)"></span> saibro · <span class="cdot" style="background:var(--blue)"></span> rápida.</span></div>`;
+    body=note+GROUP_SCHEDULE.map((rnd,idx)=>{
+      const cards=rnd.cells.map(cell=> groupMatchCard(cell.m, cell.court)).join("");
       const isLast=idx===GROUP_SCHEDULE.length-1;
-      return `<div class="round"><div class="round-h"><span class="t num">${rnd.time}</span><span class="lab">onda ${idx+1}</span>${isLast?'<span class="break">pausa 12h30–13h00</span>':''}</div><div class="mgrid">${cards}</div></div>`;
-    }).join("");
+      return `<div class="round"><div class="round-h"><span class="t num">${rnd.time}</span><span class="lab">onda ${idx+1}</span>${isLast?'<span class="break">mata-mata começa 13h</span>':''}</div><div class="mgrid">${cards}</div></div>`;
+    }).join("")+nadalCard();
   } else {
     const note = allGroupsComplete()? "" : `<div class="banner"><span>Os confrontos vão sendo preenchidos automaticamente conforme a fase de grupos termina. Já dá para lançar placar assim que os nomes aparecem.</span></div>`;
     body=note+FINALS_SCHEDULE.map(rnd=>{
-      const cards=rnd.courts.map((c,ci)=> bracketMatchCardSchedule(c,ci+1)).join("");
-      return `<div class="round"><div class="round-h"><span class="t num">${rnd.time}</span><span class="lab">Ouro/Prata: set convencional · Consolação: 4 games</span></div><div class="mgrid">${cards}</div></div>`;
+      const cards=rnd.cells.map(cell=> bracketMatchCardSchedule(cell.slot, cell.court)).join("");
+      return `<div class="round"><div class="round-h"><span class="t num">${rnd.time}</span><span class="lab">sets convencionais · repescagem da Consolação (CPI): 4 games</span></div><div class="mgrid">${cards}</div></div>`;
     }).join("");
   }
   return `<div class="page-head"><div><h1>Jogos</h1><p>Placar por quadra e horário. Insira os games de cada set${DEMO?'':' — classificação e chaves sincronizam ao vivo'}.</p></div>
-    <div class="stamp">5 quadras · grupos 4 games (30 min) · finais convencional</div></div>${tabs}${body}`;
+    <div class="stamp">grupos 10h–13h · Nadal 12h–14h · mata-mata 13h–17h</div></div>${tabs}${body}`;
 }
 function setPhase(p){ PHASE=p; render(); }
+
+function nadalCard(){
+  const n=S.nadal||{}; const a=n.a,b=n.b;
+  const aw=(a!=null&&b!=null&&a!==""&&b!==""&&+a>+b), bw=(a!=null&&b!=null&&a!==""&&b!==""&&+b>+a);
+  const champ = aw? (n.pa||"Jogador 1") : bw? (n.pb||"Jogador 2") : null;
+  const inp=(which,val)=>`<input class="nadal-inp" placeholder="${which==='pa'?'Jogador 1':'Jogador 2'}" value="${(val||'').replace(/"/g,'&quot;')}" onchange="setNadalName('${which}',this.value)">`;
+  return `<div class="round"><div class="round-h"><span class="t num">${NADAL.time}</span><span class="lab">exibição de ~2h · ${NADAL.court} · roda em paralelo à virada grupos → finais</span></div>
+    <div class="mgrid"><div class="match" style="border:1px solid var(--gold); background:linear-gradient(120deg,var(--gold-soft),transparent)">
+      <div class="m-top"><span class="court">${courtDot(NADAL.court)}${NADAL.court}</span><span class="m-tier ouro">🏆 Taça Rafael Nadal</span></div>
+      <div class="m-row ${aw?'win':''}">${inp('pa',n.pa)}${scoreInput('nadal','tt','a',a)}</div>
+      <div class="m-vs">SETS CONVENCIONAIS · ~2H</div>
+      <div class="m-row ${bw?'win':''}">${inp('pb',n.pb)}${scoreInput('nadal','tt','b',b)}</div>
+      ${champ?`<div style="text-align:center;margin-top:9px;font-weight:800;color:var(--gold)">🏆 Campeão: ${champ}</div>`:''}
+    </div></div></div>`;
+}
+function setNadalName(which,val){ if(!S.nadal)S.nadal={pa:"",pb:"",a:null,b:null}; S.nadal[which]=val.trim(); saveConfig(); render(); }
 
 /* ====================== CHAVES ====================== */
 function brow(slot,side){
@@ -772,7 +819,7 @@ function renderRegras(){
     <div class="rsec-h">Formato</div>
     <div class="rules-grid">
       <div class="rule-card"><div class="big">7×3</div><h4>Grupos</h4><p>Sete grupos de três, todos contra todos. Cada atleta joga 2 partidas na fase de grupos.</p></div>
-      <div class="rule-card"><div class="big">4</div><h4>Set curto (grupos)</h4><p>Set de 4 games, no-ad. ~30 min por jogo. 21 jogos das 10h às 12h30.</p></div>
+      <div class="rule-card"><div class="big">4</div><h4>Set curto (grupos)</h4><p>Set de 4 games, no-ad. ~30 min por jogo. 21 jogos das 10h às 13h.</p></div>
       <div class="rule-card gold"><div class="big">8</div><h4>Chave Ouro</h4><p>7 líderes de grupo + o melhor 2º colocado. Começa nas quartas.</p></div>
       <div class="rule-card silver"><div class="big">8</div><h4>Chave Prata</h4><p>Os outros 6 segundos + os 2 melhores terceiros. Começa nas quartas.</p></div>
       <div class="rule-card bronze"><div class="big">5</div><h4>Consolação</h4><p>Os 5 terceiros restantes. Repescagem, semifinais e final, em sets de 4 games.</p></div>
@@ -795,10 +842,14 @@ function renderRegras(){
       Quartas (Ouro e Prata): <b>1×8, 4×5, 3×6, 2×7</b>. Regra anti-reencontro: se o melhor 2º cairia contra o líder do próprio grupo, invertem-se os cabeças 7 e 8.
     </div>
 
-    <div class="rsec-h">Agenda</div>
+    <div class="rsec-h">Quadras e agenda</div>
     <div class="rules-text">
-      <b>10h00–12h30</b> — fase de grupos (5 quadras, 5 ondas). <b>12h30–13h00</b> — pausa e apuração.<br>
-      <b>13h00–16h00</b> — mata-mata. Quartas Ouro + repescagem Consolação (13h00), quartas Prata (13h45), semifinais das três chaves (14h30), finais (15h15).
+      Quadras: <b>Saibro 1, Saibro 2, Rápida 1 e Rápida 2</b> o dia todo; a <b>Saibro Coberta</b> entra só a partir das <b>12h00</b>. Na grade: <span class="cdot" style="background:var(--clay)"></span> saibro (laranja) e <span class="cdot" style="background:var(--blue)"></span> rápida (azul).<br>
+      Como só há <b>3 quadras de saibro</b> (Saibro 1, Saibro 2 e Coberta), das 4 QFs do Ouro <b>3 ficam no saibro</b> e 1 na rápida; semis e final do Ouro seguem no saibro. A Consolação usa a rápida.<br>
+      <b>Sets:</b> fase de grupos em 4 games; mata-mata em set convencional; a <b>repescagem da Consolação (CPI)</b> é a única do mata-mata em 4 games.<br>
+      <b>10h00–13h00</b> — fase de grupos. Ondas das 12h00/12h30 na Saibro 2, Saibro Coberta, Rápida 1 e Rápida 2 (a Saibro 1 fica com a Taça Nadal).<br>
+      <b>12h00–14h00</b> — <b>Taça Rafael Nadal</b>, exibição de ~2h na Saibro 1, dentro do bloco de grupos.<br>
+      <b>13h00–17h00</b> — mata-mata, começando logo após o último jogo de grupos (sem pausa longa). Das 13h às 14h a 1ª onda roda em 4 quadras porque a Saibro 1 ainda está com a Nadal; a partir das 14h entram as 5. QFs Prata (13h00), QFs Ouro + repescagem (14h00), semifinais (14h45), Consolação 2×3 (15h30) e <b>todas as finais às 16h15</b>, com ~45 min de descanso entre semifinal e final.
     </div>`;
 }
 
@@ -832,13 +883,11 @@ function renderSorteio(){
             <span style="font-size:12.5px;color:var(--ink-3)">Sorteio protegido.</span></div>`
         : `<div class="draft-bar"><button class="btn primary" onclick="toggleLock()">🔒 Travar grupos</button>
             <button class="btn ghost" onclick="redoDraw()">↺ Refazer sorteio</button>
-            <button class="btn ghost" style="color:var(--wine)" onclick="resetSorteio()">🗑 Limpar tudo</button>
-            <span style="font-size:12.5px;color:var(--ink-3)">Trave os grupos após o sorteio definitivo.</span></div>`)
+            <span style="font-size:12.5px;color:var(--ink-3)">Refazer sorteio mantém os potes intactos.</span></div>`)
     : `<div class="draft-bar">
         <button class="btn primary" id="btnNext" ${ready?'':'disabled'} onclick="draftNext()">🎲 Sortear próximo</button>
         <button class="btn" id="btnAuto" ${ready?'':'disabled'} onclick="draftAll()">⏩ Sortear tudo</button>
-        <button class="btn ghost" onclick="loadRoster()">Carregar inscritos</button>
-        <button class="btn ghost" style="color:var(--wine)" onclick="resetSorteio()">🗑 Limpar nomes</button>
+        <button class="btn ghost" onclick="loadRoster()">↻ Restaurar potes</button>
         ${ready?'':'<span style="font-size:12.5px;color:var(--ink-3)">Preencha 7 nomes em cada pote para liberar o sorteio.</span>'}
       </div>`;
 
@@ -905,10 +954,9 @@ function resetScores(){
 function resetSorteio(){
   if(S.groupsLocked){ toast("Grupos travados — destrave primeiro."); return; }
   if(!askCode()) return;
-  if(!confirm("Limpar o sorteio? Apaga nomes dos potes e alocação dos grupos. (Placares são mantidos — para zerar tudo use o menu.)")) return;
-  for(let p=1;p<=3;p++) S.potes[p]=["","","","","","",""];
+  if(!confirm("Limpar o sorteio? Apaga a alocação dos grupos e permite sortear de novo. Os potes e os placares são mantidos.")) return;
   GROUPS.forEach(g=> S.groups[g]=[null,null,null]);
-  S.drawDone=false; draftPlan=null; draftIdx=0; saveConfig(); render(); toast("Sorteio limpo.");
+  S.drawDone=false; draftPlan=null; draftIdx=0; normalizePotes(); saveConfig(); render(); toast("Sorteio limpo — potes mantidos.");
 }
 function redoDraw(){
   if(S.groupsLocked){ toast("Grupos travados — destrave primeiro."); return; }
@@ -931,6 +979,7 @@ function setScore(kind,id,side,val){
   const v=val.trim()===""?null:Math.max(0,Math.min(20,parseInt(val,10)||0));
   if(kind==="group"){ if(!S.results[id]) S.results[id]={a:null,b:null}; S.results[id][side]=v; saveResult(id); }
   else if(kind==="final"){ if(!S.finals[id]) S.finals[id]={a:null,b:null}; S.finals[id][side]=v; saveFinal(id); }
+  else if(kind==="nadal"){ if(!S.nadal) S.nadal={pa:"",pb:"",a:null,b:null}; S.nadal[side]=v; saveConfig(); }
   render();
 }
 function tiePanel(title,key,members){
